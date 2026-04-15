@@ -28,7 +28,7 @@ export default function EditEntry() {
     const { name, value } = e.target;
     setEntry({
       ...entry,
-      [name]: name === 'kmEnd' || name === 'kmStart' || name === 'tripCount' ? parseInt(value) || 0 : value
+      [name]: name === 'kmEnd' || name === 'kmStart' || name === 'tripCount' ? Math.max(0, parseInt(value) || 0) : value
     });
   };
 
@@ -41,7 +41,7 @@ export default function EditEntry() {
       ...entry,
       fueling: {
         ...fueling,
-        [name]: name === 'liters' || name === 'value' ? parseFloat(value) || 0 : value
+        [name]: name === 'liters' || name === 'value' ? Math.max(0, parseFloat(value) || 0) : value
       }
     });
   };
