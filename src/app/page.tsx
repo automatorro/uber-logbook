@@ -100,12 +100,28 @@ export default function Dashboard() {
         </section>
 
         <section>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
             <h2 style={{ fontSize: '1.25rem' }}>Istoric Recent</h2>
-            <Link href="/report" className="btn btn-primary" style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-              Vezi Foaia de Parcurs
-            </Link>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button 
+                className="btn" 
+                onClick={recalculateAllMileage} 
+                disabled={isSyncing || entries.length === 0}
+                style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.8rem', backgroundColor: 'var(--input)' }}
+              >
+                {isSyncing ? '⏳ Sincronizare...' : '🔄 Sincro KM'}
+              </button>
+              <Link href="/report" className="btn btn-primary" style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
+                Vezi Foaia de Parcurs
+              </Link>
+            </div>
           </div>
+
+          {isSyncing && (
+            <div className="card" style={{ textAlign: 'center', backgroundColor: '#eff6ff', color: '#1d4ed8', fontSize: '0.9rem' }}>
+              Se recalculează continuitatea kilometrajului pentru toată baza de date. Te rugăm să aștepți...
+            </div>
+          )}
 
           {entries.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', opacity: 0.6 }}>

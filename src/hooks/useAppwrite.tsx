@@ -12,6 +12,7 @@ export function useAppwrite() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Helper to flatten Appwrite doc to our Local type
   const mapFromAppwrite = (doc: any): DailyEntry => ({
@@ -192,17 +193,61 @@ export function useAppwrite() {
     alert('Migrare finalizată! Datele sunt acum în Cloud.');
   };
 
+  const recalculateAllMileage = async () => {
+    if (!user) return;
+    setIsSyncing(true);
+    try {
+      // 1. Fetch ALL entries (limit 5000 to be safe for a personal app)
+      const res = await databases.listDocuments(
+        DATABASE_ID,
+        ENTRIES_COLLECTION_ID,
+        [Query.limit(5000)]
+      );
+
+      const allEntries = res.documents.map(mapFromAppwrite);
+      // Use the utility to sync them
+      const synced = syncMileageContinuity(allEntries);
+
+      // 2. Identify changed ones
+      let changeCount = 0;
+      for (const updated of synced) {
+        const original = allEntries.find(e => e.id === updated.id);
+        if (original && (original.kmStart !== updated.kmStart)) {
+          console.log(`Syncing ${updated.date}: ${original.kmStart} -> ${updated.kmStart}`);
+          await databases.updateDocument(
+            DATABASE_ID,
+            ENTRIES_COLLECTION_ID,
+            updated.id,
+            mapToAppwrite(updated, user.$id)
+          );
+          changeCount++;
+        }
+      }
+
+      // 3. Refresh local state
+      await fetchAll(user.$id);
+      alert(`Sincronizare finalizată! ${changeCount} intrări au fost corectate.`);
+    } catch (err: any) {
+      console.error('Error during global sync:', err);
+      alert('Eroare la sincronizare: ' + err.message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return {
     user,
     entries,
     settings,
     isLoaded,
+    isSyncing,
     error,
     saveSettings,
     addEntry,
     updateEntry,
     deleteEntry,
     migrateFromLocal,
+    recalculateAllMileage,
     logout: async () => {
       await account.deleteSession('current');
       window.location.href = '/login';
