@@ -1,0 +1,206 @@
+.report-container {
+  padding: 1rem;
+  background-color: #f1f5f9;
+  min-height: 100vh;
+}
+
+.document-page {
+  background-color: white;
+  width: 29.7cm; /* A4 Landscape */
+  min-height: 21cm;
+  margin: 2rem auto;
+  padding: 1cm;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  color: black;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 8pt;
+  line-height: 1.2;
+  border: 1px solid #000;
+  position: relative;
+}
+
+.verso {
+  width: 29.7cm;
+  font-family: Arial, sans-serif;
+}
+
+/* Header Grid */
+.header-grid {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 2px solid black;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.unitatea-box {
+  width: 40%;
+  border: 1px solid black;
+  padding: 0.5rem;
+}
+
+.unitatea-title {
+  font-weight: bold;
+  font-size: 10pt;
+  text-align: center;
+}
+
+.unitatea-subtitle {
+  font-size: 7pt;
+  text-align: center;
+  border-top: 1px solid #ccc;
+  margin-top: 2px;
+}
+
+.form-title-box {
+  width: 55%;
+  text-align: center;
+}
+
+.doc-type {
+  font-size: 14pt;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.doc-details {
+  font-size: 11pt;
+  margin: 0.2rem 0;
+}
+
+.doc-details span {
+  margin: 0 1rem;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.info-grid > div {
+  border: 1px solid black;
+  padding: 0.5rem;
+  min-height: 80px;
+}
+
+.info-grid table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.info-grid th {
+    background: #eee;
+    font-size: 7pt;
+    border-bottom: 1px solid black;
+}
+
+.expiry-box .row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+
+.vehicle-details, .driver-details {
+    margin-top: 5px;
+    border-top: 1px dashed #ccc;
+    padding-top: 2px;
+}
+
+.warning-text {
+    font-size: 7pt;
+    line-height: 1.1;
+}
+
+/* Table styles */
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.doc-table th, .doc-table td {
+  border: 1px solid black;
+  padding: 2px 4px;
+  text-align: center;
+}
+
+.doc-table th {
+  background-color: #f5f5f5;
+  font-size: 7pt;
+}
+
+.fuel-table-container, .km-table-container {
+    width: 49%;
+}
+
+.tables-grid {
+    display: flex;
+    justify-content: space-between;
+}
+
+.summary-section {
+    border: 1px solid black;
+    padding: 0.5rem;
+}
+
+.consumption-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    border: 1px solid black;
+}
+
+.consumption-table th, .consumption-table td {
+    border: 1px solid black;
+    padding: 3px;
+    text-align: center;
+}
+
+/* Verso specific */
+.verso-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.verso-table th, .verso-table td {
+    border: 1px solid black;
+    padding: 2px;
+    font-size: 7.5pt;
+    text-align: center;
+}
+
+.verso-footer {
+    display: flex;
+    margin-top: 1rem;
+    justify-content: space-between;
+}
+
+.sign-box {
+    width: 30%;
+    border: 1px solid black;
+    padding: 0.5rem;
+    font-size: 8pt;
+}
+
+.sign-box.obs {
+    width: 35%;
+}
+
+@media print {
+  .report-container {
+    padding: 0;
+    background: white;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .document-page {
+    margin: 0;
+    box-shadow: none;
+    border: none;
+    page-break-after: always;
+  }
+}
