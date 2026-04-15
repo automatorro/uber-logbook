@@ -14,26 +14,40 @@ export function useAppwrite() {
   const [error, setError] = useState<string | null>(null);
 
   // Helper to flatten Appwrite doc to our Local type
-  const docToEntry = (doc: any): DailyEntry => {
-    return {
-      id: doc.$id,
+  const mapFromAppwrite = (doc: any): DailyEntry => ({
+    id: doc.$id,
+    date: doc.date,
+    kmStart: doc.kmStart,
+    kmEnd: doc.kmEnd,
+    tripCount: doc.tripCount,
+    startTime: doc.startTime,
+    endTime: doc.endTime,
+    route: doc.route,
+    fueling: doc.fueling_liters > 0 ? {
+      id: doc.$id + '_f',
       date: doc.date,
-      kmStart: doc.kmStart,
-      kmEnd: doc.kmEnd,
-      tripCount: doc.tripCount,
-      startTime: doc.startTime,
-      endTime: doc.endTime,
-      route: doc.route,
-      fueling: doc.fueling_liters ? {
-        id: doc.$id + '_f',
-        date: doc.date,
-        liters: doc.fueling_liters,
-        value: doc.fueling_value,
-        station: doc.fueling_station,
-        odometer: doc.kmEnd
-      } : undefined
-    };
-  };
+      liters: doc.fueling_liters,
+      value: doc.fueling_value,
+      station: doc.fueling_station,
+      bill: doc.fueling_bill,
+      odometer: doc.kmEnd,
+    } : undefined
+  });
+
+  const mapToAppwrite = (entry: DailyEntry, userId: string) => ({
+    date: entry.date,
+    kmStart: entry.kmStart,
+    kmEnd: entry.kmEnd,
+    tripCount: entry.tripCount,
+    startTime: entry.startTime,
+    endTime: entry.endTime,
+    route: entry.route,
+    fueling_liters: entry.fueling?.liters || 0,
+    fueling_value: entry.fueling?.value || 0,
+    fueling_station: entry.fueling?.station || '',
+    fueling_bill: entry.fueling?.bill || '',
+    userId: userId
+  });
 
   const fetchAll = useCallback(async (userId: string) => {
     try {
@@ -65,7 +79,7 @@ export function useAppwrite() {
         [Query.limit(100), Query.orderDesc('date')]
       );
 
-      setEntries(entDocs.documents.map(docToEntry));
+      setEntries(entDocs.documents.map(mapFromAppwrite));
       setIsLoaded(true);
     } catch (err: any) {
       console.error('Error fetching data:', err);
@@ -126,20 +140,9 @@ export function useAppwrite() {
         DATABASE_ID,
         ENTRIES_COLLECTION_ID,
         ID.unique(),
-        {
-          date: entry.date,
-          kmStart: entry.kmStart,
-          kmEnd: entry.kmEnd,
-          tripCount: entry.tripCount,
-          startTime: entry.startTime,
-          endTime: entry.endTime,
-          route: entry.route,
-          fueling_liters: entry.fueling?.liters || 0,
-          fueling_value: entry.fueling?.value || 0,
-          fueling_station: entry.fueling?.station || '',
-        }
+        mapToAppwrite(entry, user.$id)
       );
-      setEntries(prev => [...prev, docToEntry(doc)]);
+      setEntries(prev => [...prev, mapFromAppwrite(doc)]);
     } catch (err: any) {
       console.error('Error adding entry:', err);
       alert('Eroare la adăugarea intrării: ' + err.message);
@@ -153,20 +156,9 @@ export function useAppwrite() {
         DATABASE_ID,
         ENTRIES_COLLECTION_ID,
         id,
-        {
-          date: entry.date,
-          kmStart: entry.kmStart,
-          kmEnd: entry.kmEnd,
-          tripCount: entry.tripCount,
-          startTime: entry.startTime,
-          endTime: entry.endTime,
-          route: entry.route,
-          fueling_liters: entry.fueling?.liters || 0,
-          fueling_value: entry.fueling?.value || 0,
-          fueling_station: entry.fueling?.station || '',
-        }
+        mapToAppwrite(entry, user.$id)
       );
-      setEntries(prev => prev.map(e => e.id === id ? docToEntry(doc) : e));
+      setEntries(prev => prev.map(e => e.id === id ? mapFromAppwrite(doc) : e));
     } catch (err: any) {
       console.error('Error updating entry:', err);
       alert('Eroare la actualizarea intrării: ' + err.message);

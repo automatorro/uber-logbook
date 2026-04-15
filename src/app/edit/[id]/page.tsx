@@ -163,15 +163,27 @@ export default function EditEntry() {
             />
           </div>
         </div>
-        <div className="form-group">
-          <label>Stație Carburant</label>
-          <input 
-            className="form-control" 
-            name="station" 
-            value={entry.fueling?.station || ''} 
-            onChange={handleFuelChange}
-            placeholder="Ex: OMV, Rompetrol..."
-          />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="form-group">
+            <label>Stație Carburant</label>
+            <input 
+              className="form-control" 
+              name="station" 
+              value={entry.fueling?.station || ''} 
+              onChange={handleFuelChange}
+              placeholder="Ex: OMV, Rompetrol..."
+            />
+          </div>
+          <div className="form-group">
+            <label>Nr. Bon (Opțional)</label>
+            <input 
+              className="form-control" 
+              name="bill" 
+              value={entry.fueling?.bill || ''} 
+              onChange={handleFuelChange}
+              placeholder="Ex: 5678"
+            />
+          </div>
         </div>
       </div>
 

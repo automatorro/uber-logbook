@@ -116,7 +116,6 @@ export default function ReportPage() {
                   <th rowSpan={2}>Data</th>
                   <th colSpan={2}>COMBUSTIBIL</th>
                   <th rowSpan={2}>Statie carburanti</th>
-                  <th rowSpan={2}>Litri comb in rezervor</th>
                   <th rowSpan={2}>Nr. Bonului de combustibil</th>
                 </tr>
                 <tr>
@@ -131,12 +130,11 @@ export default function ReportPage() {
                     <td>{e.fueling?.liters}</td>
                     <td>{e.fueling?.value}</td>
                     <td>{e.fueling?.station}</td>
-                    <td>{e.kmEnd}</td>
-                    <td>#</td>
+                    <td>{e.fueling?.bill || '-'}</td>
                   </tr>
                 ))}
                 {Array.from({ length: Math.max(0, 15 - monthEntries.filter(e => e.fueling).length) }).map((_, i) => (
-                  <tr key={i}><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                  <tr key={i}><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
                 ))}
               </tbody>
               <tfoot>
@@ -144,7 +142,7 @@ export default function ReportPage() {
                     <td>TOTAL</td>
                     <td>{totalLiters.toFixed(2)}</td>
                     <td>{totalFuelVal.toFixed(2)}</td>
-                    <td colSpan={3}>&nbsp;</td>
+                    <td colSpan={2}>&nbsp;</td>
                 </tr>
               </tfoot>
             </table>

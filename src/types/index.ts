@@ -5,6 +5,7 @@ export interface Fueling {
   value: number;
   station: string;
   odometer: number;
+  bill?: string;
 }
 
 export interface TripDetail {
