@@ -3,31 +3,18 @@ import { DailyEntry } from "../types";
 export function syncMileageContinuity(entries: DailyEntry[]): DailyEntry[] {
   if (entries.length <= 1) return entries;
 
-  // Sort by date ascending
+  // Sort by date ascending to ensure chronological order
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
 
   const synced = sorted.map((entry, index) => {
-    // 1. Ensure current entry's kmEnd is at least its kmStart
-    const current = { ...entry };
-    if (current.kmEnd < current.kmStart && current.kmEnd !== 0) {
-      current.kmEnd = current.kmStart;
-    }
-
-    if (index === 0) return current;
+    if (index === 0) return entry;
     
     const previous = sorted[index - 1];
-    
-    // 2. ONLY sync if previous has a valid kmEnd (not 0) 
-    // and if current kmStart is actually 0 or smaller than previous kmEnd
-    if (previous.kmEnd > 0) {
-      current.kmStart = previous.kmEnd;
-      // Also adjust kmEnd if it's now lagging behind the new kmStart
-      if (current.kmEnd < current.kmStart) {
-        current.kmEnd = current.kmStart;
-      }
-    }
-
-    return current;
+    // Today's departure value is the arrival value from the day before
+    return {
+      ...entry,
+      kmStart: previous.kmEnd
+    };
   });
 
   return synced;
