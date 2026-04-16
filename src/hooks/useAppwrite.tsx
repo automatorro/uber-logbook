@@ -5,6 +5,7 @@ import { account, databases, DATABASE_ID, ENTRIES_COLLECTION_ID, SETTINGS_COLLEC
 import { Query, ID, Models } from 'appwrite';
 import { DailyEntry, Settings } from '@/types';
 import { DEFAULT_SETTINGS } from '@/constants/defaults';
+import { syncMileageContinuity } from '@/utils/mileage';
 
 export function useAppwrite() {
   const [entries, setEntries] = useState<DailyEntry[]>([]);
