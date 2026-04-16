@@ -7,7 +7,7 @@ import { DailyEntry } from '@/types';
 import { syncMileageContinuity } from '@/utils/mileage';
 
 export default function Dashboard() {
-  const { entries, settings, isLoaded, addEntry, deleteEntry, migrateFromLocal, user } = useAppwrite();
+  const { entries, settings, isLoaded, addEntry, deleteEntry, migrateFromLocal, user, recalculateAllMileage, isSyncing } = useAppwrite();
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
   const [hasLocalData, setHasLocalData] = useState(false);
 
