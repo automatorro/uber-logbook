@@ -51,8 +51,10 @@ export default function LoginPage() {
         await account.createEmailPasswordSession(email, password);
       }
 
-      // Folosim replace ca să nu lăsăm /login în stiva de navigare
-      router.replace('/');
+      // Full reload în loc de router.replace — layout-ul rămâne montat
+      // și useAppwrite ar vedea user=null momentan, cauzând un redirect loop.
+      // window.location.href forțează reinițializarea completă a hook-ului.
+      window.location.href = '/';
     } catch (err: any) {
       if (isMounted.current) {
         setError(err.message || 'Eroare de autentificare. Verifică datele.');
