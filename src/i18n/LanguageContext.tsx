@@ -1,12 +1,12 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import translations, { Lang } from './translations';
+import translations, { Lang, Translations } from './translations';
 
 interface LanguageContextType {
   lang: Lang;
   toggleLanguage: () => void;
-  t: typeof translations['ro'];
+  t: Translations;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
@@ -18,7 +18,6 @@ const LanguageContext = createContext<LanguageContextType>({
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>('ro');
 
-  // Citim limba salvată la prima randare
   useEffect(() => {
     const saved = localStorage.getItem('uber-lang') as Lang | null;
     if (saved === 'ro' || saved === 'en') {

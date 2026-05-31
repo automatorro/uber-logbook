@@ -1,6 +1,102 @@
 export type Lang = 'ro' | 'en';
 
-const translations = {
+export interface Translations {
+  nav: {
+    brand: string;
+    report: string;
+    settings: string;
+    logout: string;
+  };
+  dashboard: {
+    welcome: string;
+    title: string;
+    statDays: string;
+    statKmTotal: string;
+    statKmMonth: string;
+    addSectionLabel: string;
+    addDateLabel: string;
+    addButton: string;
+    addHint: string;
+    historySectionTitle: string;
+    historyCount: (days: number, trips: number) => string;
+    syncBtn: string;
+    syncingBtn: string;
+    reportBtn: string;
+    syncMessage: string;
+    emptyTitle: string;
+    emptyText: string;
+    migrationTitle: string;
+    migrationText: string;
+    migrationBtn: string;
+    migrationConfirm: string;
+    deleteConfirm: string;
+    alreadyExists: string;
+    loading: string;
+    trips: string;
+  };
+  edit: {
+    title: string;
+    sectionMileage: string;
+    kmStart: string;
+    kmEnd: string;
+    startTime: string;
+    endTime: string;
+    sectionActivity: string;
+    tripCount: string;
+    route: string;
+    sectionFuel: string;
+    liters: string;
+    value: string;
+    station: string;
+    stationPlaceholder: string;
+    bill: string;
+    billPlaceholder: string;
+    save: string;
+    cancel: string;
+    kmError: string;
+    loading: string;
+  };
+  settings: {
+    title: string;
+    sectionPfa: string;
+    pfaName: string;
+    pfaCif: string;
+    sectionVehicle: string;
+    carBrand: string;
+    carModel: string;
+    carPlate: string;
+    sectionAnaf: string;
+    driverName: string;
+    fuelNorm: string;
+    defaultZone: string;
+    saveBtn: string;
+    loading: string;
+  };
+  login: {
+    titleLogin: string;
+    titleRegister: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    passwordLabel: string;
+    passwordPlaceholder: string;
+    loginBtn: string;
+    registerBtn: string;
+    loadingBtn: string;
+    switchToRegister: string;
+    switchToLogin: string;
+    switchToRegisterLink: string;
+    switchToLoginLink: string;
+    footer: string;
+    error: string;
+  };
+  report: {
+    filterTitle: string;
+    printBtn: string;
+    loading: string;
+  };
+}
+
+const translations: Record<Lang, Translations> = {
   ro: {
     nav: {
       brand: 'Foaie Parcurs',
@@ -192,6 +288,6 @@ const translations = {
       loading: 'Loading...',
     },
   },
-} as const;
+};
 
 export default translations;
