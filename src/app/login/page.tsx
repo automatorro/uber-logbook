@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { account } from '@/lib/appwrite';
 import { ID } from 'appwrite';
@@ -12,19 +12,31 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    // Check if already logged in
+    isMounted.current = true;
+
+    // Dacă există deja o sesiune activă, du direct pe dashboard
     const checkSession = async () => {
       try {
         await account.get();
-        router.push('/');
-      } catch (err) {
-        // Not logged in, stay on page
+        if (isMounted.current) {
+          // router.replace nu lasă /login în history (nu poți da Back)
+          router.replace('/');
+        }
+      } catch {
+        // Nu există sesiune, rămânem pe pagina de login
       }
     };
+
     checkSession();
-  }, [router]);
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // router este stabil, nu e nevoie în deps
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,19 +45,22 @@ export default function LoginPage() {
 
     try {
       if (isRegistering) {
-        // Create account
         await account.create(ID.unique(), email, password);
-        // Login after registration
         await account.createEmailPasswordSession(email, password);
       } else {
-        // Standard login
         await account.createEmailPasswordSession(email, password);
       }
-      router.push('/');
+
+      // Folosim replace ca să nu lăsăm /login în stiva de navigare
+      router.replace('/');
     } catch (err: any) {
-      setError(err.message || 'Eroare de autentificare. Verifică datele.');
+      if (isMounted.current) {
+        setError(err.message || 'Eroare de autentificare. Verifică datele.');
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -55,54 +70,56 @@ export default function LoginPage() {
         <h1 style={{ textAlign: 'center', marginBottom: '1.5rem', fontSize: '1.5rem' }}>
           {isRegistering ? 'Creare Cont Uber Log' : 'Autentificare'}
         </h1>
-        
+
         <form onSubmit={handleAuth}>
           <div className="form-group">
             <label>Email</label>
-            <input 
-              className="form-control" 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+            <input
+              className="form-control"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               placeholder="email@exemplu.com"
+              autoComplete="email"
             />
           </div>
-          
+
           <div className="form-group">
             <label>Parolă</label>
-            <input 
-              className="form-control" 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
-              placeholder="********"
+            <input
+              className="form-control"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="minimum 8 caractere"
+              autoComplete={isRegistering ? 'new-password' : 'current-password'}
             />
           </div>
 
           {error && (
-            <div style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '1rem', textAlign: 'center' }}>
-              {error}
+            <div style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '1rem', textAlign: 'center', padding: '0.5rem', background: '#fef2f2', borderRadius: '0.5rem' }}>
+              ⚠️ {error}
             </div>
           )}
 
           <button className="btn btn-primary" type="submit" disabled={loading}>
-            {loading ? 'Se procesează...' : (isRegistering ? 'Înregistrare' : 'Conectare')}
+            {loading ? '⏳ Se procesează...' : (isRegistering ? '✅ Înregistrare' : '🔑 Conectare')}
           </button>
         </form>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem', opacity: 0.8 }}>
-          {isRegistering ? 'Ai deja cont?' : 'Nu ai cont?'} 
-          <button 
-            onClick={() => setIsRegistering(!isRegistering)} 
+          {isRegistering ? 'Ai deja cont?' : 'Nu ai cont?'}
+          <button
+            onClick={() => { setIsRegistering(!isRegistering); setError(''); }}
             style={{ color: 'var(--primary)', marginLeft: '0.5rem', fontWeight: 600, textDecoration: 'underline' }}
           >
             {isRegistering ? 'Conectează-te' : 'Creează unul'}
           </button>
         </div>
       </div>
-      
+
       <p style={{ textAlign: 'center', marginTop: '2rem', opacity: 0.5, fontSize: '0.8rem' }}>
         Aplicație personală pentru gestiunea foilor de parcurs.
       </p>

@@ -17,8 +17,11 @@ export default function RootLayout({
   const isLoginPage = pathname === '/login';
 
   useEffect(() => {
-    if (isLoaded && !user && !isLoginPage) {
-      router.push('/login');
+    // Așteptăm ca isLoaded să fie true înainte de orice redirect
+    // altfel facem push('/login') în timp ce sesiunea se încă încarcă
+    if (!isLoaded) return;
+    if (!user && !isLoginPage) {
+      router.replace('/login');
     }
   }, [isLoaded, user, isLoginPage, router]);
 
