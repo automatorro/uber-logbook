@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { account } from '@/lib/appwrite';
 import { ID } from 'appwrite';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,38 +11,29 @@ export default function LoginPage() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const { lang, toggleLanguage, t } = useLanguage();
   const isMounted = useRef(true);
 
   useEffect(() => {
     isMounted.current = true;
-
-    // Dacă există deja o sesiune activă, du direct pe dashboard
     const checkSession = async () => {
       try {
         await account.get();
         if (isMounted.current) {
-          // router.replace nu lasă /login în history (nu poți da Back)
-          router.replace('/');
+          window.location.href = '/';
         }
       } catch {
         // Nu există sesiune, rămânem pe pagina de login
       }
     };
-
     checkSession();
-
-    return () => {
-      isMounted.current = false;
-    };
+    return () => { isMounted.current = false; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // router este stabil, nu e nevoie în deps
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       if (isRegistering) {
         await account.create(ID.unique(), email, password);
@@ -50,14 +41,10 @@ export default function LoginPage() {
       } else {
         await account.createEmailPasswordSession(email, password);
       }
-
-      // Full reload în loc de router.replace — layout-ul rămâne montat
-      // și useAppwrite ar vedea user=null momentan, cauzând un redirect loop.
-      // window.location.href forțează reinițializarea completă a hook-ului.
       window.location.href = '/';
     } catch (err: any) {
       if (isMounted.current) {
-        setError(err.message || 'Eroare de autentificare. Verifică datele.');
+        setError(err.message || t.login.error);
       }
     } finally {
       if (isMounted.current) {
@@ -68,34 +55,57 @@ export default function LoginPage() {
 
   return (
     <div className="container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '80vh' }}>
+
+      {/* Toggle limbă pe pagina de login */}
+      <div style={{ position: 'fixed', top: '1rem', right: '1rem' }}>
+        <button
+          onClick={toggleLanguage}
+          style={{
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            border: '1.5px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '0.3rem 0.7rem',
+            background: 'var(--surface)',
+            color: 'var(--foreground)'
+          }}
+        >
+          {lang === 'ro' ? '🇬🇧 EN' : '🇷🇴 RO'}
+        </button>
+      </div>
+
       <div className="card" style={{ maxWidth: '400px', margin: '0 auto', width: '100%' }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '1.5rem', fontSize: '1.5rem' }}>
-          {isRegistering ? 'Creare Cont Uber Log' : 'Autentificare'}
-        </h1>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🚖</div>
+          <h1 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+            {isRegistering ? t.login.titleRegister : t.login.titleLogin}
+          </h1>
+        </div>
 
         <form onSubmit={handleAuth}>
           <div className="form-group">
-            <label>Email</label>
+            <label>{t.login.emailLabel}</label>
             <input
               className="form-control"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="email@exemplu.com"
+              placeholder={t.login.emailPlaceholder}
               autoComplete="email"
             />
           </div>
 
           <div className="form-group">
-            <label>Parolă</label>
+            <label>{t.login.passwordLabel}</label>
             <input
               className="form-control"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="minimum 8 caractere"
+              placeholder={t.login.passwordPlaceholder}
               autoComplete={isRegistering ? 'new-password' : 'current-password'}
             />
           </div>
@@ -107,23 +117,23 @@ export default function LoginPage() {
           )}
 
           <button className="btn btn-primary" type="submit" disabled={loading}>
-            {loading ? '⏳ Se procesează...' : (isRegistering ? '✅ Înregistrare' : '🔑 Conectare')}
+            {loading ? t.login.loadingBtn : (isRegistering ? t.login.registerBtn : t.login.loginBtn)}
           </button>
         </form>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem', opacity: 0.8 }}>
-          {isRegistering ? 'Ai deja cont?' : 'Nu ai cont?'}
+          {isRegistering ? t.login.switchToLogin : t.login.switchToRegister}
           <button
             onClick={() => { setIsRegistering(!isRegistering); setError(''); }}
             style={{ color: 'var(--primary)', marginLeft: '0.5rem', fontWeight: 600, textDecoration: 'underline' }}
           >
-            {isRegistering ? 'Conectează-te' : 'Creează unul'}
+            {isRegistering ? t.login.switchToLoginLink : t.login.switchToRegisterLink}
           </button>
         </div>
       </div>
 
       <p style={{ textAlign: 'center', marginTop: '2rem', opacity: 0.5, fontSize: '0.8rem' }}>
-        Aplicație personală pentru gestiunea foilor de parcurs.
+        {t.login.footer}
       </p>
     </div>
   );

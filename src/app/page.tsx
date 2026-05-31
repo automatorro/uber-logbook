@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useAppwrite } from '@/hooks/useAppwrite';
 import { DailyEntry } from '@/types';
 import { syncMileageContinuity } from '@/utils/mileage';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 export default function Dashboard() {
   const { entries, settings, isLoaded, addEntry, deleteEntry, migrateFromLocal, user, recalculateAllMileage, isSyncing } = useAppwrite();
+  const { t } = useLanguage();
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
   const [hasLocalData, setHasLocalData] = useState(false);
 
@@ -18,7 +20,7 @@ export default function Dashboard() {
     }
   }, []);
 
-  // ── Helpers (neatins) ──────────────────────────────────────────────────────
+  // ── Helpers (neatinse) ─────────────────────────────────────────────────────
   const getLatestKmEnd = () => {
     if (entries.length === 0) return 0;
     const sorted = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -28,7 +30,7 @@ export default function Dashboard() {
   const handleAddDay = async () => {
     const exists = entries.find(e => e.date === newDate);
     if (exists) {
-      alert('Există deja o intrare pentru această dată!');
+      alert(t.dashboard.alreadyExists);
       return;
     }
     const latestKm = getLatestKmEnd();
@@ -46,13 +48,13 @@ export default function Dashboard() {
   };
 
   const removeEntry = async (id: string) => {
-    if (confirm('Sigur vrei să ștergi această zi?')) {
+    if (confirm(t.dashboard.deleteConfirm)) {
       await deleteEntry(id);
     }
   };
 
   const handleMigrate = async () => {
-    if (confirm('Dorești să imporți datele salvate local în Cloud? (Aceasta se face o singură dată)')) {
+    if (confirm(t.dashboard.migrationConfirm)) {
       await migrateFromLocal();
       setHasLocalData(false);
       localStorage.removeItem('uber-entries');
@@ -75,7 +77,7 @@ export default function Dashboard() {
     return (
       <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>
         <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🚖</div>
-        <p style={{ color: 'var(--muted)', fontWeight: 500 }}>Se încarcă datele...</p>
+        <p style={{ color: 'var(--muted)', fontWeight: 500 }}>{t.dashboard.loading}</p>
       </div>
     );
   }
@@ -90,10 +92,10 @@ export default function Dashboard() {
         <div className="alert-migration animate-in">
           <div>
             <p style={{ fontSize: '0.85rem', color: '#92400e', fontWeight: 600, marginBottom: '0.15rem' }}>
-              📦 Date locale detectate
+              {t.dashboard.migrationTitle}
             </p>
             <p style={{ fontSize: '0.8rem', color: '#78350f' }}>
-              Ai date salvate pe acest dispozitiv care nu sunt încă în Cloud.
+              {t.dashboard.migrationText}
             </p>
           </div>
           <button
@@ -101,7 +103,7 @@ export default function Dashboard() {
             onClick={handleMigrate}
             style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.8rem', background: '#d97706', boxShadow: 'none', flexShrink: 0 }}
           >
-            Migrează
+            {t.dashboard.migrationBtn}
           </button>
         </div>
       )}
@@ -116,25 +118,13 @@ export default function Dashboard() {
           position: 'relative',
           overflow: 'hidden'
         }}>
-          {/* decorative circles */}
-          <div style={{
-            position: 'absolute', top: '-30px', right: '-30px',
-            width: '120px', height: '120px',
-            background: 'rgba(255,255,255,0.1)',
-            borderRadius: '50%'
-          }} />
-          <div style={{
-            position: 'absolute', bottom: '-20px', right: '60px',
-            width: '80px', height: '80px',
-            background: 'rgba(255,255,255,0.07)',
-            borderRadius: '50%'
-          }} />
-
+          <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '120px', height: '120px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', bottom: '-20px', right: '60px', width: '80px', height: '80px', background: 'rgba(255,255,255,0.07)', borderRadius: '50%' }} />
           <p style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.75, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
-            Bun venit înapoi
+            {t.dashboard.welcome}
           </p>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '0.25rem' }}>
-            Activitate Uber 🚖
+            {t.dashboard.title}
           </h1>
           <p style={{ fontSize: '0.85rem', opacity: 0.8, fontWeight: 500 }}>
             {settings.carBrand} {settings.carModel} · {settings.carPlate}
@@ -151,26 +141,26 @@ export default function Dashboard() {
       <div className="stats-grid animate-in" style={{ animationDelay: '0.1s' }}>
         <div className="stat-card">
           <div className="stat-value">{entries.length}</div>
-          <div className="stat-label">Zile lucrate</div>
+          <div className="stat-label">{t.dashboard.statDays}</div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{totalKm.toLocaleString('ro-RO')}</div>
-          <div className="stat-label">Km total</div>
+          <div className="stat-label">{t.dashboard.statKmTotal}</div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{thisMonthKm.toLocaleString('ro-RO')}</div>
-          <div className="stat-label">Km luna asta</div>
+          <div className="stat-label">{t.dashboard.statKmMonth}</div>
         </div>
       </div>
 
       {/* ── Adaugă zi ────────────────────────────────────────────────────── */}
       <div className="card animate-in" style={{ animationDelay: '0.15s' }}>
         <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', marginBottom: '1rem' }}>
-          ➕ Înregistrează o zi nouă
+          {t.dashboard.addSectionLabel}
         </p>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <div className="form-group" style={{ flex: 1, minWidth: '150px', marginBottom: 0 }}>
-            <label>Data</label>
+            <label>{t.dashboard.addDateLabel}</label>
             <input
               className="form-control"
               type="date"
@@ -183,12 +173,11 @@ export default function Dashboard() {
             onClick={handleAddDay}
             style={{ width: 'auto', flex: '0 0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}
           >
-            Adaugă Zi
+            {t.dashboard.addButton}
           </button>
         </div>
         <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.75rem', lineHeight: 1.5 }}>
-          💡 Kilometrajul de start este completat automat din ultima zi înregistrată.
-          Editează intrarea pentru a adăuga curse, alimentări și detalii.
+          {t.dashboard.addHint}
         </p>
       </div>
 
@@ -196,9 +185,9 @@ export default function Dashboard() {
       <section className="animate-in" style={{ animationDelay: '0.2s' }}>
         <div className="section-header">
           <div>
-            <h2 className="section-title">Istoric activitate</h2>
+            <h2 className="section-title">{t.dashboard.historySectionTitle}</h2>
             {entries.length > 0 && (
-              <p className="section-count">{entries.length} {entries.length === 1 ? 'zi' : 'zile'} · {totalTrips} curse</p>
+              <p className="section-count">{t.dashboard.historyCount(entries.length, totalTrips)}</p>
             )}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -218,29 +207,29 @@ export default function Dashboard() {
                 opacity: entries.length === 0 ? 0.4 : 1
               }}
             >
-              {isSyncing ? '⏳ Se sincronizează...' : '🔄 Sincro KM'}
+              {isSyncing ? t.dashboard.syncingBtn : t.dashboard.syncBtn}
             </button>
             <Link
               href="/report"
               className="btn btn-primary"
               style={{ width: 'auto', padding: '0.5rem 0.85rem', fontSize: '0.78rem' }}
             >
-              📄 Foaie Parcurs
+              {t.dashboard.reportBtn}
             </Link>
           </div>
         </div>
 
         {isSyncing && (
           <div className="alert-sync">
-            ⏳ Se recalculează continuitatea kilometrajului pentru toată baza de date. Te rugăm să aștepți...
+            {t.dashboard.syncMessage}
           </div>
         )}
 
         {entries.length === 0 ? (
           <div className="card empty-state">
             <div className="empty-state-icon">🗓️</div>
-            <p className="empty-state-title">Nicio zi înregistrată încă</p>
-            <p className="empty-state-text">Selectează o dată de mai sus și apasă „Adaugă Zi" pentru a începe.</p>
+            <p className="empty-state-title">{t.dashboard.emptyTitle}</p>
+            <p className="empty-state-text">{t.dashboard.emptyText}</p>
           </div>
         ) : (
           sortedEntries.map((entry, index) => {
@@ -261,7 +250,7 @@ export default function Dashboard() {
                       <span className="badge badge-amber">⛽ {entry.fueling.liters}L</span>
                     )}
                     {entry.tripCount > 0 && (
-                      <span className="badge badge-purple">🚦 {entry.tripCount} curse</span>
+                      <span className="badge badge-purple">🚦 {entry.tripCount} {t.dashboard.trips}</span>
                     )}
                   </div>
                   <div className="entry-km" style={{ marginTop: '0.3rem' }}>
@@ -281,13 +270,13 @@ export default function Dashboard() {
                 </div>
 
                 <div className="entry-actions">
-                  <Link href={`/edit/${entry.id}`} className="btn-icon btn-icon-edit" title="Editează">
+                  <Link href={`/edit/${entry.id}`} className="btn-icon btn-icon-edit" title={t.edit.save}>
                     ✏️
                   </Link>
                   <button
                     onClick={() => removeEntry(entry.id)}
                     className="btn-icon btn-icon-delete"
-                    title="Șterge"
+                    title={t.edit.cancel}
                   >
                     🗑️
                   </button>

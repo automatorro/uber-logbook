@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useAppwrite } from '@/hooks/useAppwrite';
+import { useLanguage } from '@/i18n/LanguageContext';
 import './report.css';
 
 export default function ReportPage() {
   const { entries, settings, isLoaded } = useAppwrite();
+  const { t } = useLanguage();
   
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -25,16 +27,16 @@ export default function ReportPage() {
 
   const monthName = new Intl.DateTimeFormat('ro-RO', { month: 'long' }).format(new Date(currentYear, currentMonth)).toUpperCase();
 
-  if (!isLoaded) return <div className="container">Incarcare...</div>;
+  if (!isLoaded) return <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}><div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📄</div><p style={{ color: 'var(--muted)', fontWeight: 500 }}>{t.report.loading}</p></div>;
 
   return (
     <div className="report-container">
       <div className="no-print controls card">
-        <h3>Filtrare Raport</h3>
+        <h3>{t.report.filterTitle}</h3>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-          <select 
-            className="form-control" 
-            value={currentMonth} 
+          <select
+            className="form-control"
+            value={currentMonth}
             onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
           >
             {Array.from({ length: 12 }).map((_, i) => (
@@ -43,15 +45,15 @@ export default function ReportPage() {
               </option>
             ))}
           </select>
-          <input 
-            className="form-control" 
-            type="number" 
-            value={currentYear} 
+          <input
+            className="form-control"
+            type="number"
+            value={currentYear}
             onChange={(e) => setCurrentYear(parseInt(e.target.value))}
           />
         </div>
         <button className="btn btn-primary" onClick={() => window.print()} style={{ marginTop: '1rem' }}>
-          🖨️ Imprimă Raportul (A4)
+          {t.report.printBtn}
         </button>
       </div>
 
