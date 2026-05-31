@@ -27,37 +27,27 @@ export default function RootLayout({
       <head>
         <title>Uber Foaie de Parcurs</title>
         <meta name="description" content="Management automat pentru foi de parcurs ANAF" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body>
         {!isLoginPage && (
-          <nav className="no-print" style={{ 
-            backgroundColor: 'var(--card)', 
-            borderBottom: '1px solid var(--border)',
-            padding: '1rem',
-            position: 'sticky',
-            top: 0,
-            zIndex: 10,
-            boxShadow: 'var(--shadow)'
-          }}>
-            <div className="container" style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              padding: '0 1rem' 
-            }}>
-              <Link href="/" style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary)' }}>
-                🚖 Foaie Parcurs
+          <nav className="navbar no-print">
+            <div className="container navbar-inner">
+              <Link href="/" className="navbar-brand">
+                <div className="brand-icon">🚖</div>
+                <span>Foaie Parcurs</span>
               </Link>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div className="navbar-links">
                 {isLoaded && user && (
                   <>
-                    <Link href="/settings" style={{ fontSize: '0.9rem', fontWeight: 500 }}>
-                      Setări
+                    <Link href="/report" className="nav-link">
+                      📄 Raport
                     </Link>
-                    <button 
-                      onClick={logout} 
-                      style={{ fontSize: '0.8rem', opacity: 0.6, cursor: 'pointer', background: 'none', border: 'none', color: 'inherit', fontWeight: 'inherit' }}
-                    >
+                    <Link href="/settings" className="nav-link">
+                      ⚙️ Setări
+                    </Link>
+                    <button onClick={logout} className="nav-btn-logout">
                       Ieșire
                     </button>
                   </>
