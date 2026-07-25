@@ -18,6 +18,12 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const isPublic = PUBLIC_PATHS.includes(pathname);
 
   useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  }, []);
+
+  useEffect(() => {
     if (!isLoaded) return;
     if (!user && !isPublic) router.replace('/landing');
   }, [isLoaded, user, isPublic, router]);
@@ -91,7 +97,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <title>PFAuto</title>
         <meta name="description" content="Foaie de parcurs automată pentru șoferi Uber & Bolt PFA" />
-        <meta name="theme-color" content="#EA6842" />
+        <meta name="theme-color" content="#D7FF4C" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
