@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 function LoginForm() {
@@ -51,11 +52,14 @@ function LoginForm() {
     <div style={{ minHeight: '100vh', background: '#F2EEE3', display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', maxWidth: 420, margin: '0 auto', width: '100%', padding: '80px 28px 40px', boxSizing: 'border-box' }}>
 
-        <div style={{ width: 52, height: 52, borderRadius: 16, background: '#171511', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 28 }}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <path d="M4 17L10 7L14 13L20 5" stroke="#D7FF4C" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
+        <Link href="/landing" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 36, alignSelf: 'flex-start' }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: '#171511', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M4 17L10 7L14 13L20 5" stroke="#D7FF4C" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span style={{ fontWeight: 800, fontSize: 17, letterSpacing: '-0.02em', color: '#171511' }}>PFAuto</span>
+        </Link>
 
         <h1 style={{ fontSize: 30, fontWeight: 800, color: '#171511', letterSpacing: '-0.02em', margin: '0 0 8px' }}>
           {isRegister ? 'Creează cont' : 'Bine ai revenit'}
