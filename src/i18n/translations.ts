@@ -108,7 +108,7 @@ export interface Translations {
 const translations: Record<Lang, Translations> = {
   ro: {
     nav: {
-      brand: 'Foaie Parcurs',
+      brand: 'PFAuto',
       report: 'Raport',
       settings: 'Setări',
       logout: 'Ieșire',
@@ -213,7 +213,7 @@ const translations: Record<Lang, Translations> = {
 
   en: {
     nav: {
-      brand: 'Trip Sheet',
+      brand: 'PFAuto',
       report: 'Report',
       settings: 'Settings',
       logout: 'Sign out',

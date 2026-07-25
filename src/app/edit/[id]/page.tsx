@@ -9,14 +9,7 @@ import { useToast } from '@/app/components/Toast';
 import { supabase } from '@/lib/supabase';
 
 function newFueling(entryDate: string): Fueling {
-  return {
-    id: 'new_' + Math.random().toString(36).substring(2, 11),
-    date: entryDate,
-    liters: 0,
-    value: 0,
-    station: '',
-    bill: '',
-  };
+  return { id: 'new_' + Math.random().toString(36).substring(2, 11), date: entryDate, liters: 0, value: 0, station: '', bill: '' };
 }
 
 async function compressImage(file: File, maxWidth = 1200): Promise<{ base64: string; mediaType: string }> {
@@ -61,10 +54,7 @@ export default function EditEntry() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!entry) return;
     const { name, value } = e.target;
-    setEntry({
-      ...entry,
-      [name]: name === 'kmEnd' || name === 'kmStart' || name === 'tripCount' ? Math.max(0, parseInt(value) || 0) : value
-    });
+    setEntry({ ...entry, [name]: name === 'kmEnd' || name === 'kmStart' || name === 'tripCount' ? Math.max(0, parseInt(value) || 0) : value });
   };
 
   const addFueling = () => {
@@ -95,8 +85,6 @@ export default function EditEntry() {
     setScanning(true);
     try {
       const { base64, mediaType } = await compressImage(file);
-
-      // Upload to Supabase storage
       let billPhotoUrl: string | undefined;
       if (user) {
         const fuelingId = 'new_' + Math.random().toString(36).substring(2, 11);
@@ -105,35 +93,20 @@ export default function EditEntry() {
         const { error: uploadErr } = await supabase.storage.from('fuel-receipts').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
         if (!uploadErr) billPhotoUrl = path;
       }
-
-      // Apel OCR
-      const res = await fetch('/api/ocr-receipt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: base64, mediaType }),
-      });
+      const res = await fetch('/api/ocr-receipt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ imageBase64: base64, mediaType }) });
       const data = await res.json();
-
       if (data.ocrFailed) {
         showToast(t.edit.ocrFailed, 'warning');
         const f = newFueling(entry.date);
         if (billPhotoUrl) f.billPhotoUrl = billPhotoUrl;
         setEntry({ ...entry, fuelings: [...entry.fuelings, f] });
       } else {
-        const f: Fueling = {
-          id: 'new_' + Math.random().toString(36).substring(2, 11),
-          date: data.date || entry.date,
-          liters: data.liters ?? 0,
-          value: data.value ?? 0,
-          station: data.station ?? '',
-          bill: data.bill ?? '',
-          billPhotoUrl,
-        };
+        const f: Fueling = { id: 'new_' + Math.random().toString(36).substring(2, 11), date: data.date || entry.date, liters: data.liters ?? 0, value: data.value ?? 0, station: data.station ?? '', bill: data.bill ?? '', billPhotoUrl };
         setEntry({ ...entry, fuelings: [...entry.fuelings, f] });
         setOcrFilledIds(prev => new Set(prev).add(f.id));
         showToast(t.edit.ocrAutoFilled, 'success');
       }
-    } catch (err) {
+    } catch {
       showToast(t.edit.ocrFailed, 'warning');
     } finally {
       setScanning(false);
@@ -142,173 +115,194 @@ export default function EditEntry() {
 
   const handleSave = async () => {
     if (!entry) return;
-    if (entry.kmEnd < entry.kmStart) {
-      showToast(t.edit.kmError, 'error');
-      return;
-    }
+    if (entry.kmEnd < entry.kmStart) { showToast(t.edit.kmError, 'error'); return; }
     await updateEntry(id, entry);
     showToast('Ziua a fost salvată.', 'success');
     router.push('/');
   };
 
   if (!isLoaded || !entry) return (
-    <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>
-      <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🚖</div>
-      <p style={{ color: 'var(--muted)', fontWeight: 500 }}>{t.edit.loading}</p>
+    <div style={{ minHeight: '100vh', background: '#F2EEE3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: '#8C8776', fontWeight: 600 }}>{t.edit.loading}</p>
     </div>
   );
 
   const totalLiters = entry.fuelings.reduce((s, f) => s + f.liters, 0);
-  const totalValue = entry.fuelings.reduce((s, f) => s + f.value, 0);
+  const totalValue  = entry.fuelings.reduce((s, f) => s + f.value, 0);
+
+  const inputStyle: React.CSSProperties = { height: 52, borderRadius: 16, border: '1.5px solid #E7E2D3', background: '#fff', padding: '0 14px', fontSize: 15, color: '#171511', fontFamily: 'inherit', fontWeight: 500, width: '100%', boxSizing: 'border-box', outline: 'none' };
+  const smallInput: React.CSSProperties = { height: 44, borderRadius: 12, border: '1.5px solid #E7E2D3', background: '#fff', padding: '0 12px', fontSize: 14, color: '#171511', fontFamily: 'inherit', fontWeight: 500, width: '100%', boxSizing: 'border-box', outline: 'none' };
 
   return (
-    <div className="container" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
-      <h1 style={{ marginBottom: '0.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>{t.edit.title}</h1>
-      <p style={{ marginBottom: '1.5rem', fontWeight: 600, color: 'var(--muted)' }}>
-        {new Date(entry.date).toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long' })}
-      </p>
+    <div style={{ minHeight: '100vh', background: '#F2EEE3', paddingBottom: 100 }}>
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px' }}>
 
-      <div className="card">
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.1rem', fontWeight: 700 }}>{t.edit.sectionMileage}</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div className="form-group">
-            <label>{t.edit.kmStart}</label>
-            <input className="form-control" type="number" name="kmStart" value={entry.kmStart} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>{t.edit.kmEnd}</label>
-            <input className="form-control" type="number" name="kmEnd" value={entry.kmEnd} onChange={handleChange} />
-          </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div className="form-group">
-            <label>{t.edit.startTime}</label>
-            <input className="form-control" type="time" name="startTime" value={entry.startTime} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>{t.edit.endTime}</label>
-            <input className="form-control" type="time" name="endTime" value={entry.endTime} onChange={handleChange} />
-          </div>
-        </div>
-      </div>
-
-      <div className="card">
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.1rem', fontWeight: 700 }}>{t.edit.sectionActivity}</h2>
-        <div className="form-group">
-          <label>{t.edit.tripCount}</label>
-          <input className="form-control" type="number" name="tripCount" value={entry.tripCount} onChange={handleChange} />
-        </div>
-        <div className="form-group">
-          <label>{t.edit.route}</label>
-          <input className="form-control" name="route" value={entry.route} onChange={handleChange} />
-        </div>
-      </div>
-
-      {/* Secțiunea alimentări */}
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{t.edit.sectionFuel}</h2>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {/* Input ascuns pentru fișier */}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              style={{ display: 'none' }}
-              onChange={e => { const f = e.target.files?.[0]; if (f) handleScanReceipt(f); e.target.value = ''; }}
-            />
-            <button
-              className="btn btn-secondary"
-              onClick={() => fileRef.current?.click()}
-              disabled={scanning}
-              style={{ width: 'auto', padding: '0.4rem 0.85rem', fontSize: '0.82rem', opacity: scanning ? 0.6 : 1 }}
-            >
-              {scanning ? t.edit.scanningBtn : t.edit.scanReceiptBtn}
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={addFueling}
-              style={{ width: 'auto', padding: '0.4rem 0.85rem', fontSize: '0.82rem' }}
-            >
-              {t.edit.addFuelingBtn}
-            </button>
-          </div>
-        </div>
-
-        {entry.fuelings.length === 0 ? (
-          <p style={{ color: 'var(--muted)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>
-            {t.edit.noFuelingsText}
+        {/* Header */}
+        <div style={{ paddingTop: 24, paddingBottom: 8 }}>
+          <button onClick={() => router.push('/')} style={{ background: 'none', border: 'none', color: '#8C8776', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#8C8776" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Înapoi
+          </button>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: '#171511', letterSpacing: '-0.01em', margin: '0 0 4px' }}>{t.edit.title}</h1>
+          <p style={{ fontSize: 14, color: '#8C8776', fontWeight: 600, margin: 0 }}>
+            {new Date(entry.date).toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
-        ) : (
-          <>
-            {entry.fuelings.map((fueling, idx) => {
-              const isOcr = ocrFilledIds.has(fueling.id);
-              return (
-                <div key={fueling.id} style={{
-                  border: `1.5px solid ${isOcr ? '#6366f1' : 'var(--border)'}`,
-                  borderRadius: 'var(--radius)',
-                  padding: '1rem',
-                  marginBottom: '0.75rem',
-                  background: isOcr ? 'rgba(99,102,241,0.04)' : 'var(--surface)',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.85rem', color: isOcr ? 'var(--primary)' : 'var(--muted)' }}>
-                      ⛽ #{idx + 1}{isOcr ? ` — ${t.edit.ocrAutoFilled}` : ''}
-                    </span>
-                    <button
-                      onClick={() => removeFueling(fueling.id)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: '0.85rem', fontWeight: 600 }}
-                    >
-                      {t.edit.removeFuelingBtn}
-                    </button>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>{t.edit.liters}</label>
-                      <input className="form-control" type="number" step="0.01" value={fueling.liters || ''} onChange={e => updateFuelingField(fueling.id, 'liters', e.target.value)} placeholder="0.00" />
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>{t.edit.value}</label>
-                      <input className="form-control" type="number" step="0.01" value={fueling.value || ''} onChange={e => updateFuelingField(fueling.id, 'value', e.target.value)} placeholder="0.00" />
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>{t.edit.station}</label>
-                      <input className="form-control" value={fueling.station} onChange={e => updateFuelingField(fueling.id, 'station', e.target.value)} placeholder={t.edit.stationPlaceholder} />
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>{t.edit.bill}</label>
-                      <input className="form-control" value={fueling.bill || ''} onChange={e => updateFuelingField(fueling.id, 'bill', e.target.value)} placeholder={t.edit.billPlaceholder} />
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label>{t.edit.fuelingDate}</label>
-                      <input className="form-control" type="date" value={fueling.date} onChange={e => updateFuelingField(fueling.id, 'date', e.target.value)} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+        </div>
 
-            <div style={{
-              background: 'var(--gradient-hero)',
-              color: 'white',
-              borderRadius: 'var(--radius)',
-              padding: '0.65rem 1rem',
-              fontSize: '0.88rem',
-              fontWeight: 700,
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}>
-              <span>{t.edit.dailyTotalLabel}</span>
-              <span>{totalLiters.toFixed(2)} L / {totalValue.toFixed(2)} RON</span>
+        {/* Scan section */}
+        <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E7E2D3', padding: 20, marginBottom: 12, marginTop: 16 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#171511', margin: '0 0 4px' }}>Scanează bonul</h2>
+          <p style={{ fontSize: 13, color: '#8C8776', margin: '0 0 14px' }}>Fă o poză bonului de combustibil, restul e automat.</p>
+
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleScanReceipt(f); e.target.value = ''; }} />
+
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={scanning}
+            style={{ width: '100%', height: 200, borderRadius: 18, background: '#171511', border: 'none', cursor: scanning ? 'wait' : 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 10 }}
+          >
+            {/* Corner brackets */}
+            {!scanning && ['tl','tr','bl','br'].map(c => (
+              <div key={c} style={{ position: 'absolute', width: 26, height: 26,
+                ...(c.includes('t') ? { top: 16 } : { bottom: 16 }),
+                ...(c.includes('l') ? { left: 16 } : { right: 16 }),
+                borderTop: c.includes('t') ? '2.5px solid #EA6842' : 'none',
+                borderBottom: c.includes('b') ? '2.5px solid #EA6842' : 'none',
+                borderLeft: c.includes('l') ? '2.5px solid #EA6842' : 'none',
+                borderRight: c.includes('r') ? '2.5px solid #EA6842' : 'none',
+                borderTopLeftRadius: c === 'tl' ? 8 : 0,
+                borderTopRightRadius: c === 'tr' ? 8 : 0,
+                borderBottomLeftRadius: c === 'bl' ? 8 : 0,
+                borderBottomRightRadius: c === 'br' ? 8 : 0,
+              }} />
+            ))}
+            {scanning ? (
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15, fontWeight: 600 }}>⏳ Se scanează...</p>
+            ) : (
+              <>
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z" stroke="rgba(255,255,255,0.85)" strokeWidth="1.8" strokeLinejoin="round"/>
+                  <circle cx="12" cy="13" r="3.4" stroke="rgba(255,255,255,0.85)" strokeWidth="1.8"/>
+                </svg>
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 600, margin: 0 }}>Apasă pentru a fotografia bonul</p>
+              </>
+            )}
+          </button>
+
+          {entry.fuelings.some(f => ocrFilledIds.has(f.id)) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3FAE6A' }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#3FAE6A' }}>Date extrase automat de AI</span>
             </div>
-          </>
-        )}
+          )}
+        </div>
+
+        {/* Fuelings */}
+        <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E7E2D3', padding: 20, marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: '#171511', margin: 0 }}>{t.edit.sectionFuel}</h2>
+            <button onClick={addFueling} style={{ background: '#EA6842', color: '#fff', border: 'none', borderRadius: 100, padding: '6px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+              + Adaugă
+            </button>
+          </div>
+
+          {entry.fuelings.length === 0 ? (
+            <p style={{ color: '#8C8776', fontSize: 14, textAlign: 'center', padding: '12px 0' }}>{t.edit.noFuelingsText}</p>
+          ) : (
+            <>
+              {entry.fuelings.map((fueling, idx) => {
+                const isOcr = ocrFilledIds.has(fueling.id);
+                return (
+                  <div key={fueling.id} style={{ borderRadius: 16, border: `1.5px solid ${isOcr ? '#EA6842' : '#E7E2D3'}`, padding: 14, marginBottom: 10, background: isOcr ? 'rgba(234,104,66,0.04)' : '#FAFAF8' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                      <span style={{ fontWeight: 700, fontSize: 13, color: isOcr ? '#EA6842' : '#8C8776' }}>
+                        ⛽ #{idx + 1}{isOcr ? ' — auto-completat' : ''}
+                      </span>
+                      <button onClick={() => removeFueling(fueling.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C24B2E', fontSize: 13, fontWeight: 600 }}>
+                        ✕ Șterge
+                      </button>
+                    </div>
+
+                    {/* Extracted data card style */}
+                    <div style={{ borderRadius: 12, border: '1px solid #EFEBDD', overflow: 'hidden', marginBottom: 10 }}>
+                      {[
+                        { label: t.edit.fuelingDate, node: <input type="date" value={fueling.date} onChange={e => updateFuelingField(fueling.id, 'date', e.target.value)} style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 'auto' }} /> },
+                        { label: t.edit.liters,       node: <input type="number" step="0.01" value={fueling.liters || ''} onChange={e => updateFuelingField(fueling.id, 'liters', e.target.value)} placeholder="0.00" style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 80 }} /> },
+                        { label: t.edit.value,        node: <input type="number" step="0.01" value={fueling.value || ''} onChange={e => updateFuelingField(fueling.id, 'value', e.target.value)} placeholder="0.00" style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 90 }} /> },
+                        { label: t.edit.station,      node: <input value={fueling.station} onChange={e => updateFuelingField(fueling.id, 'station', e.target.value)} placeholder="OMV, Petrom..." style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 130 }} /> },
+                        { label: t.edit.bill,         node: <input value={fueling.bill || ''} onChange={e => updateFuelingField(fueling.id, 'bill', e.target.value)} placeholder="nr. bon" style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 100 }} /> },
+                      ].map((row, i, arr) => (
+                        <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderBottom: i < arr.length - 1 ? '1px solid #EFEBDD' : 'none', background: '#fff' }}>
+                          <span style={{ fontSize: 13.5, color: '#8C8776', fontWeight: 600 }}>{row.label}</span>
+                          {row.node}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Daily total */}
+              <div style={{ background: 'linear-gradient(135deg, #201D16 0%, #3A2A1F 60%, #EA6842 130%)', borderRadius: 14, padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 13.5, fontWeight: 700, color: '#fff' }}>{t.edit.dailyTotalLabel}</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>{totalLiters.toFixed(2)} L / {totalValue.toFixed(2)} RON</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Kilometraj */}
+        <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E7E2D3', padding: 20, marginBottom: 12 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#171511', margin: '0 0 14px' }}>{t.edit.sectionMileage}</h2>
+          <p className="section-label" style={{ marginBottom: 8 }}>Kilometraj zi</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+            <div style={{ background: '#F8F5EE', borderRadius: 16, padding: '12px 14px', border: '1px solid #E7E2D3' }}>
+              <div style={{ fontSize: 12, color: '#8C8776', fontWeight: 600, marginBottom: 6 }}>Plecare</div>
+              <input type="number" name="kmStart" value={entry.kmStart} onChange={handleChange} style={{ ...inputStyle, height: 36, borderRadius: 8, padding: '0 10px', fontSize: 16, fontWeight: 700, border: '1.5px solid #E7E2D3' }} />
+            </div>
+            <div style={{ background: '#F8F5EE', borderRadius: 16, padding: '12px 14px', border: '1px solid #E7E2D3' }}>
+              <div style={{ fontSize: 12, color: '#8C8776', fontWeight: 600, marginBottom: 6 }}>Sosire</div>
+              <input type="number" name="kmEnd" value={entry.kmEnd} onChange={handleChange} style={{ ...inputStyle, height: 36, borderRadius: 8, padding: '0 10px', fontSize: 16, fontWeight: 700, border: '1.5px solid #E7E2D3' }} />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>{t.edit.startTime}</label>
+              <input className="form-control" type="time" name="startTime" value={entry.startTime} onChange={handleChange} />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>{t.edit.endTime}</label>
+              <input className="form-control" type="time" name="endTime" value={entry.endTime} onChange={handleChange} />
+            </div>
+          </div>
+        </div>
+
+        {/* Activity */}
+        <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E7E2D3', padding: 20, marginBottom: 12 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#171511', margin: '0 0 14px' }}>{t.edit.sectionActivity}</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>{t.edit.tripCount}</label>
+              <input className="form-control" type="number" name="tripCount" value={entry.tripCount} onChange={handleChange} />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>{t.edit.route}</label>
+              <input className="form-control" name="route" value={entry.route} onChange={handleChange} />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <button className="btn btn-primary" onClick={handleSave}>{t.edit.save}</button>
-        <button className="btn btn-secondary" onClick={() => router.push('/')}>{t.edit.cancel}</button>
+      {/* Fixed save button */}
+      <div style={{ position: 'fixed', bottom: 76, left: 0, right: 0, padding: '12px 16px', background: 'rgba(242,238,227,0.95)', backdropFilter: 'blur(8px)', borderTop: '1px solid #E7E2D3', display: 'flex', gap: 10, maxWidth: 640, margin: '0 auto' }}>
+        <button onClick={handleSave} style={{ flex: 1, height: 52, borderRadius: 100, background: '#EA6842', color: '#fff', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 6px 16px rgba(234,104,66,0.35)' }}>
+          {t.edit.save}
+        </button>
+        <button onClick={() => router.push('/')} style={{ flex: '0 0 auto', height: 52, borderRadius: 100, background: 'transparent', border: '1.5px solid #E7E2D3', color: '#8C8776', fontSize: 15, fontWeight: 600, padding: '0 20px', cursor: 'pointer' }}>
+          {t.edit.cancel}
+        </button>
       </div>
     </div>
   );
