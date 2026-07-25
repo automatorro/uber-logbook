@@ -230,6 +230,9 @@ export function useSupabase() {
     }
   };
 
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  const isAdmin = !!adminEmail && user?.email === adminEmail;
+
   return {
     user,
     entries,
@@ -237,7 +240,7 @@ export function useSupabase() {
     isLoaded,
     isSyncing,
     subscriptionStatus,
-    isSubscribed: subscriptionStatus === 'active',
+    isSubscribed: isAdmin || subscriptionStatus === 'active',
     error,
     saveSettings,
     addEntry,

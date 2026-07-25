@@ -52,14 +52,13 @@ export function UpgradeGate({ userEmail, userId }: Props) {
           </svg>
         </div>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>Abonament necesar</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>25 RON / lună (TVA inclus)</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>3 zile gratuite, apoi 25 RON/lună</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>Anulezi oricând • TVA inclus • Fără obligații</div>
         </div>
       </div>
 
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', margin: '0 0 14px', lineHeight: 1.5 }}>
-        Adaugă zile noi și accesează toate funcțiile aplicației cu un abonament lunar.
-        Istoricul tău rămâne mereu disponibil.
+        Începe gratuit 3 zile — nu ți se percepe nimic acum. Adaugă datele cardului doar pentru a continua după trial.
       </p>
 
       <button
@@ -77,7 +76,7 @@ export function UpgradeGate({ userEmail, userId }: Props) {
           width: '100%',
         }}
       >
-        {loading ? 'Se deschide Stripe...' : 'Activează abonament — 25 RON/lună'}
+        {loading ? 'Se deschide Stripe...' : 'Începe gratuit — 3 zile trial'}
       </button>
 
       {error && (

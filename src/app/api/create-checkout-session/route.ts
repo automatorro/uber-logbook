@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       cancel_url: `${appUrl}/?subscription=canceled`,
       client_reference_id: userId,
       allow_promotion_codes: true,
+      subscription_data: { trial_period_days: 3 },
     });
 
     return NextResponse.json({ url: session.url });
