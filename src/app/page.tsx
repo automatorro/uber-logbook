@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { useSupabase } from '@/hooks/useSupabase';
 import { DailyEntry } from '@/types';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useToast } from '@/app/components/Toast';
+import { SkeletonCard, SkeletonStats } from '@/app/components/Skeleton';
 
 export default function Dashboard() {
   const { entries, settings, isLoaded, addEntry, deleteEntry, migrateFromLocal, user, recalculateAllMileage, isSyncing } = useSupabase();
   const { t } = useLanguage();
+  const { showToast, confirm } = useToast();
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
   const [hasLocalData, setHasLocalData] = useState(false);
 
@@ -28,7 +31,7 @@ export default function Dashboard() {
   const handleAddDay = async () => {
     const exists = entries.find(e => e.date === newDate);
     if (exists) {
-      alert(t.dashboard.alreadyExists);
+      showToast(t.dashboard.alreadyExists, 'warning');
       return;
     }
     const latestKm = getLatestKmEnd();
@@ -47,13 +50,16 @@ export default function Dashboard() {
   };
 
   const removeEntry = async (id: string) => {
-    if (confirm(t.dashboard.deleteConfirm)) {
+    const ok = await confirm(t.dashboard.deleteConfirm);
+    if (ok) {
       await deleteEntry(id);
+      showToast('Ziua a fost ștearsă.', 'success');
     }
   };
 
   const handleMigrate = async () => {
-    if (confirm(t.dashboard.migrationConfirm)) {
+    const ok = await confirm(t.dashboard.migrationConfirm);
+    if (ok) {
       await migrateFromLocal();
       setHasLocalData(false);
       localStorage.removeItem('uber-entries');
@@ -72,9 +78,11 @@ export default function Dashboard() {
 
   if (!isLoaded) {
     return (
-      <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>
-        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🚖</div>
-        <p style={{ color: 'var(--muted)', fontWeight: 500 }}>{t.dashboard.loading}</p>
+      <div className="container" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
+        <div className="skeleton" style={{ height: '130px', borderRadius: 'var(--radius-lg)', marginBottom: '1.75rem' }} />
+        <SkeletonStats />
+        <div className="skeleton" style={{ height: '110px', borderRadius: 'var(--radius)', marginBottom: '1rem' }} />
+        {[1, 2, 3, 4, 5].map(i => <SkeletonCard key={i} />)}
       </div>
     );
   }

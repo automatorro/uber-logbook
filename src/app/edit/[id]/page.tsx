@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useSupabase } from '@/hooks/useSupabase';
 import { DailyEntry, Fueling } from '@/types';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useToast } from '@/app/components/Toast';
 
 function newFueling(entryDate: string): Fueling {
   return {
@@ -23,6 +24,7 @@ export default function EditEntry() {
   const id = params.id as string;
   const { entries, isLoaded, updateEntry } = useSupabase();
   const { t } = useLanguage();
+  const { showToast } = useToast();
   const [entry, setEntry] = useState<DailyEntry | null>(null);
 
   useEffect(() => {
@@ -73,10 +75,11 @@ export default function EditEntry() {
   const handleSave = async () => {
     if (!entry) return;
     if (entry.kmEnd < entry.kmStart) {
-      alert(t.edit.kmError);
+      showToast(t.edit.kmError, 'error');
       return;
     }
     await updateEntry(id, entry);
+    showToast('Ziua a fost salvată.', 'success');
     router.push('/');
   };
 

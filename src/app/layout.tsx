@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { LanguageProvider, useLanguage } from '@/i18n/LanguageContext';
 import InstallPrompt from './components/InstallPrompt';
+import { ToastProvider } from './components/Toast';
 
 function NavBar() {
   const { user, logout, isLoaded } = useSupabase();
@@ -78,11 +79,13 @@ export default function RootLayout({
       </head>
       <body>
         <LanguageProvider>
-          <NavBar />
-          <InstallPrompt />
-          <main style={{ paddingBottom: '2rem' }}>
-            {children}
-          </main>
+          <ToastProvider>
+            <NavBar />
+            <InstallPrompt />
+            <main style={{ paddingBottom: '2rem' }}>
+              {children}
+            </main>
+          </ToastProvider>
         </LanguageProvider>
       </body>
     </html>

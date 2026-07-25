@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { DailyEntry, Fueling, Settings } from '@/types';
 import { DEFAULT_SETTINGS } from '@/constants/defaults';
 import { syncMileageContinuity } from '@/utils/mileage';
+import { useToast } from '@/app/components/Toast';
 import type { User } from '@supabase/supabase-js';
 
 export function useSupabase() {
@@ -14,6 +15,7 @@ export function useSupabase() {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const { showToast } = useToast();
 
   const mapFromDB = (row: any): DailyEntry => ({
     id: row.id,
@@ -109,7 +111,7 @@ export function useSupabase() {
     };
     const { error: err } = await supabase.from('settings').upsert(row, { onConflict: 'user_id' });
     if (err) {
-      alert('Eroare la salvarea setărilor: ' + err.message);
+      showToast('Eroare la salvarea setărilor: ' + err.message, 'error');
       return;
     }
     setSettings(newSettings);
@@ -131,7 +133,7 @@ export function useSupabase() {
       })
       .select()
       .single();
-    if (err) { alert('Eroare la adăugarea intrării: ' + err.message); return; }
+    if (err) { showToast('Eroare la adăugarea intrării: ' + err.message, 'error'); return; }
     const newEntry: DailyEntry = { ...mapFromDB(data), fuelings: [] };
     setEntries(prev => [newEntry, ...prev]);
   };
@@ -152,7 +154,7 @@ export function useSupabase() {
         updated_at: new Date().toISOString(),
       })
       .eq('id', id);
-    if (entryErr) { alert('Eroare la actualizarea intrării: ' + entryErr.message); return; }
+    if (entryErr) { showToast('Eroare la actualizarea intrării: ' + entryErr.message, 'error'); return; }
 
     await supabase.from('fuelings').delete().eq('entry_id', id);
 
@@ -170,7 +172,7 @@ export function useSupabase() {
       })).map(r => { if (!r.id) { const { id: _, ...rest } = r; return rest; } return r; });
 
       const { error: fuelErr } = await supabase.from('fuelings').insert(rows);
-      if (fuelErr) { alert('Eroare la salvarea alimentărilor: ' + fuelErr.message); return; }
+      if (fuelErr) { showToast('Eroare la salvarea alimentărilor: ' + fuelErr.message, 'error'); return; }
     }
 
     setEntries(prev => prev.map(e => e.id === id ? { ...entry, id } : e));
@@ -179,7 +181,7 @@ export function useSupabase() {
   const deleteEntry = async (id: string) => {
     if (!user) return;
     const { error: err } = await supabase.from('entries').delete().eq('id', id);
-    if (err) { alert('Eroare la ștergerea intrării: ' + err.message); return; }
+    if (err) { showToast('Eroare la ștergerea intrării: ' + err.message, 'error'); return; }
     setEntries(prev => prev.filter(e => e.id !== id));
   };
 
@@ -191,7 +193,7 @@ export function useSupabase() {
     for (const e of localEntries) {
       await addEntry({ ...e, fuelings: e.fuelings ?? [] });
     }
-    alert('Migrare finalizată! Datele sunt acum în Cloud.');
+    showToast('Migrare finalizată! Datele sunt acum în Cloud.', 'success');
   };
 
   const recalculateAllMileage = async () => {
@@ -218,9 +220,9 @@ export function useSupabase() {
       }
 
       await fetchAll(user.id);
-      alert(`Sincronizare finalizată! ${changeCount} intrări au fost corectate.`);
+      showToast(`Sincronizare finalizată! ${changeCount} intrări corectate.`, 'success');
     } catch (err: any) {
-      alert('Eroare la sincronizare: ' + err.message);
+      showToast('Eroare la sincronizare: ' + err.message, 'error');
     } finally {
       setIsSyncing(false);
     }
