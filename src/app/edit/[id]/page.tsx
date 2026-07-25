@@ -167,10 +167,10 @@ export default function EditEntry() {
               <div key={c} style={{ position: 'absolute', width: 26, height: 26,
                 ...(c.includes('t') ? { top: 16 } : { bottom: 16 }),
                 ...(c.includes('l') ? { left: 16 } : { right: 16 }),
-                borderTop: c.includes('t') ? '2.5px solid #EA6842' : 'none',
-                borderBottom: c.includes('b') ? '2.5px solid #EA6842' : 'none',
-                borderLeft: c.includes('l') ? '2.5px solid #EA6842' : 'none',
-                borderRight: c.includes('r') ? '2.5px solid #EA6842' : 'none',
+                borderTop: c.includes('t') ? '2.5px solid #D7FF4C' : 'none',
+                borderBottom: c.includes('b') ? '2.5px solid #D7FF4C' : 'none',
+                borderLeft: c.includes('l') ? '2.5px solid #D7FF4C' : 'none',
+                borderRight: c.includes('r') ? '2.5px solid #D7FF4C' : 'none',
                 borderTopLeftRadius: c === 'tl' ? 8 : 0,
                 borderTopRightRadius: c === 'tr' ? 8 : 0,
                 borderBottomLeftRadius: c === 'bl' ? 8 : 0,
@@ -202,7 +202,7 @@ export default function EditEntry() {
         <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E7E2D3', padding: 20, marginBottom: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <h2 style={{ fontSize: 15, fontWeight: 700, color: '#171511', margin: 0 }}>{t.edit.sectionFuel}</h2>
-            <button onClick={addFueling} style={{ background: '#EA6842', color: '#fff', border: 'none', borderRadius: 100, padding: '6px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+            <button onClick={addFueling} style={{ background: '#D7FF4C', color: '#171511', border: 'none', borderRadius: 100, padding: '6px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
               + Adaugă
             </button>
           </div>
@@ -214,9 +214,9 @@ export default function EditEntry() {
               {entry.fuelings.map((fueling, idx) => {
                 const isOcr = ocrFilledIds.has(fueling.id);
                 return (
-                  <div key={fueling.id} style={{ borderRadius: 16, border: `1.5px solid ${isOcr ? '#EA6842' : '#E7E2D3'}`, padding: 14, marginBottom: 10, background: isOcr ? 'rgba(234,104,66,0.04)' : '#FAFAF8' }}>
+                  <div key={fueling.id} style={{ borderRadius: 16, border: `1.5px solid ${isOcr ? '#D7FF4C' : '#E7E2D3'}`, padding: 14, marginBottom: 10, background: isOcr ? 'rgba(215,255,76,0.05)' : '#FAFAF8' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                      <span style={{ fontWeight: 700, fontSize: 13, color: isOcr ? '#EA6842' : '#8C8776' }}>
+                      <span style={{ fontWeight: 700, fontSize: 13, color: isOcr ? '#4A5A0F' : '#8C8776' }}>
                         ⛽ #{idx + 1}{isOcr ? ' — auto-completat' : ''}
                       </span>
                       <button onClick={() => removeFueling(fueling.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C24B2E', fontSize: 13, fontWeight: 600 }}>
@@ -244,7 +244,7 @@ export default function EditEntry() {
               })}
 
               {/* Daily total */}
-              <div style={{ background: 'linear-gradient(135deg, #201D16 0%, #3A2A1F 60%, #EA6842 130%)', borderRadius: 14, padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ background: 'linear-gradient(135deg, #201D16 0%, #3A2A1F 60%, #D7FF4C 130%)', borderRadius: 14, padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 13.5, fontWeight: 700, color: '#fff' }}>{t.edit.dailyTotalLabel}</span>
                 <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>{totalLiters.toFixed(2)} L / {totalValue.toFixed(2)} RON</span>
               </div>
@@ -297,7 +297,7 @@ export default function EditEntry() {
 
       {/* Fixed save button */}
       <div style={{ position: 'fixed', bottom: 76, left: 0, right: 0, padding: '12px 16px', background: 'rgba(242,238,227,0.95)', backdropFilter: 'blur(8px)', borderTop: '1px solid #E7E2D3', display: 'flex', gap: 10, maxWidth: 640, margin: '0 auto' }}>
-        <button onClick={handleSave} style={{ flex: 1, height: 52, borderRadius: 100, background: '#EA6842', color: '#fff', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 6px 16px rgba(234,104,66,0.35)' }}>
+        <button onClick={handleSave} style={{ flex: 1, height: 52, borderRadius: 100, background: '#D7FF4C', color: '#171511', fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 6px 16px rgba(215,255,76,0.3)' }}>
           {t.edit.save}
         </button>
         <button onClick={() => router.push('/')} style={{ flex: '0 0 auto', height: 52, borderRadius: 100, background: 'transparent', border: '1.5px solid #E7E2D3', color: '#8C8776', fontSize: 15, fontWeight: 600, padding: '0 20px', cursor: 'pointer' }}>

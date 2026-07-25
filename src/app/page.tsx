@@ -102,7 +102,7 @@ export default function Dashboard() {
       )}
 
       {/* Hero */}
-      <div className="animate-in" style={{ background: 'linear-gradient(135deg, #201D16 0%, #3A2A1F 60%, #EA6842 130%)', borderRadius: 24, padding: 24, position: 'relative', overflow: 'hidden', marginBottom: '0.875rem' }}>
+      <div className="animate-in" style={{ background: 'linear-gradient(135deg, #201D16 0%, #3A2A1F 60%, #D7FF4C 130%)', borderRadius: 24, padding: 24, position: 'relative', overflow: 'hidden', marginBottom: '0.875rem' }}>
         <div style={{ position: 'absolute', top: -30, right: -20, width: 120, height: 120, background: 'rgba(255,255,255,0.08)', borderRadius: '50%' }} />
         <p style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.6)', margin: '0 0 6px' }}>
           Bună, {driverFirstName}
@@ -130,10 +130,10 @@ export default function Dashboard() {
 
       {/* Scan CTA */}
       <button onClick={handleScanToday} className="animate-in" style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#171511', borderRadius: 20, padding: '16px 18px', marginBottom: '0.875rem', width: '100%', textAlign: 'left', boxShadow: '0 10px 24px rgba(23,21,17,0.2)', border: 'none', cursor: 'pointer', animationDelay: '0.07s' }}>
-        <div style={{ width: 44, height: 44, borderRadius: 14, background: '#EA6842', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 14, background: '#D7FF4C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z" stroke="#fff" strokeWidth="2" strokeLinejoin="round"/>
-            <circle cx="12" cy="13" r="3.2" stroke="#fff" strokeWidth="2"/>
+            <path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z" stroke="#171511" strokeWidth="2" strokeLinejoin="round"/>
+            <circle cx="12" cy="13" r="3.2" stroke="#171511" strokeWidth="2"/>
           </svg>
         </div>
         <div style={{ flex: 1 }}>

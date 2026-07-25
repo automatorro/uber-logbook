@@ -1,18 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --accent: #EA6842;
-  --accent-hover: #C8532F;
-  --accent-light: rgba(234, 104, 66, 0.12);
+  /* Lime — use as bg on dark surfaces; never as text on light */
+  --accent: #D7FF4C;
+  --accent-hover: #bdd900;
+  --accent-light: rgba(215, 255, 76, 0.12);
+  /* Olive — use as text/icon color on light surfaces */
+  --accent-text: #4A5A0F;
+
   --success: #3FAE6A;
   --success-light: rgba(63, 174, 106, 0.12);
   --danger: #C24B2E;
   --danger-light: rgba(194, 75, 46, 0.12);
 
-  /* backward-compat aliases used in existing components */
-  --primary: #EA6842;
-  --primary-hover: #C8532F;
-  --primary-light: rgba(234, 104, 66, 0.12);
+  /* backward-compat aliases */
+  --primary: #D7FF4C;
+  --primary-hover: #bdd900;
+  --primary-light: rgba(215, 255, 76, 0.12);
 
   --background: #F2EEE3;
   --surface: #FFFFFF;
@@ -31,9 +35,9 @@
   --shadow-sm: 0 1px 3px rgba(23,21,17,0.06);
   --shadow: 0 4px 16px rgba(23,21,17,0.08), 0 1px 4px rgba(23,21,17,0.04);
   --shadow-lg: 0 12px 40px rgba(23,21,17,0.12), 0 4px 12px rgba(23,21,17,0.06);
-  --shadow-accent: 0 8px 20px rgba(234,104,66,0.35);
+  --shadow-accent: 0 8px 20px rgba(215,255,76,0.25);
 
-  --gradient-hero: linear-gradient(135deg, #201D16 0%, #3A2A1F 60%, #EA6842 130%);
+  --gradient-hero: linear-gradient(135deg, #201D16 0%, #3A2A1F 60%, #D7FF4C 130%);
   --gradient-card: linear-gradient(145deg, #ffffff 0%, #faf9f6 100%);
 }
 
@@ -75,14 +79,14 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 .btn-primary {
   background: var(--accent);
-  color: white;
+  color: #171511;
   box-shadow: var(--shadow-accent);
 }
 
 .btn-primary:hover {
   background: var(--accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(234,104,66,0.45);
+  box-shadow: 0 12px 28px rgba(215,255,76,0.35);
 }
 
 .btn-primary:active { transform: translateY(0); }
@@ -96,8 +100,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 .btn-secondary:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--accent-text);
+  color: var(--accent-text);
   transform: translateY(-1px);
 }
 
@@ -138,8 +142,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 .form-control:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(234, 104, 66, 0.15);
+  border-color: var(--accent-text);
+  box-shadow: 0 0 0 3px rgba(215, 255, 76, 0.2);
 }
 
 select.form-control { padding-left: 1rem; }
@@ -155,8 +159,8 @@ select.form-control { padding-left: 1rem; }
   font-weight: 700;
 }
 
-.badge-purple { background: rgba(234,104,66,0.1); color: var(--accent); }
-.badge-amber  { background: rgba(234,104,66,0.1); color: var(--accent-hover); }
+.badge-purple { background: rgba(215,255,76,0.12); color: var(--accent-text); }
+.badge-amber  { background: rgba(215,255,76,0.12); color: var(--accent-text); }
 .badge-green  { background: var(--success-light); color: var(--success); }
 
 /* ── Bottom Tab Bar ── */
@@ -193,7 +197,7 @@ select.form-control { padding-left: 1rem; }
   color: var(--muted);
 }
 
-.tab-item.active > span { color: var(--accent); }
+.tab-item.active > span { color: #4A5A0F; }
 
 /* ── Stats Grid ── */
 .stats-grid {
@@ -241,7 +245,7 @@ select.form-control { padding-left: 1rem; }
   transition: border-color 0.15s;
 }
 
-.entry-card:hover { border-color: rgba(234,104,66,0.35); }
+.entry-card:hover { border-color: rgba(74,90,15,0.3); }
 
 .entry-date { font-weight: 700; font-size: 0.9rem; color: var(--foreground); }
 .entry-km { font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
@@ -264,7 +268,7 @@ select.form-control { padding-left: 1rem; }
 }
 
 .btn-icon:hover { transform: scale(1.1); }
-.btn-icon-edit:hover   { background: var(--accent-light);  border-color: var(--accent); }
+.btn-icon-edit:hover   { background: var(--accent-light);  border-color: var(--accent-text); }
 .btn-icon-delete:hover { background: var(--danger-light); border-color: var(--danger); }
 
 /* ── Section Labels ── */

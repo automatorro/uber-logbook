@@ -41,7 +41,7 @@ function TabBar({ pathname }: { pathname: string }) {
   const isSettings = pathname === '/settings';
   const ink = '#171511';
   const muted = '#8C8776';
-  const accent = '#EA6842';
+  const accent = '#4A5A0F';
 
   return (
     <nav className="tab-bar no-print">

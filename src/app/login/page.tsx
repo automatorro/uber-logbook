@@ -48,7 +48,7 @@ export default function LoginPage() {
 
         <div style={{ width: 52, height: 52, borderRadius: 16, background: '#171511', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 28 }}>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <path d="M4 17L10 7L14 13L20 5" stroke="#EA6842" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4 17L10 7L14 13L20 5" stroke="#D7FF4C" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
 
@@ -85,7 +85,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword(v => !v)}
-              style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', fontSize: 13, fontWeight: 600, color: '#EA6842', background: 'none', border: 'none', cursor: 'pointer' }}
+              style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', fontSize: 13, fontWeight: 600, color: '#4A5A0F', background: 'none', border: 'none', cursor: 'pointer' }}
             >
               {showPassword ? 'Ascunde' : 'Arată'}
             </button>
@@ -93,7 +93,7 @@ export default function LoginPage() {
 
           {!isRegister && (
             <div style={{ textAlign: 'right', marginBottom: 28 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#EA6842', cursor: 'pointer' }}>Ai uitat parola?</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#4A5A0F', cursor: 'pointer' }}>Ai uitat parola?</span>
             </div>
           )}
 
@@ -113,9 +113,9 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             style={{
-              height: 56, borderRadius: 100, background: '#EA6842', color: '#fff',
+              height: 56, borderRadius: 100, background: '#D7FF4C', color: '#171511',
               fontSize: 16, fontWeight: 700, border: 'none', cursor: loading ? 'wait' : 'pointer',
-              boxShadow: '0 8px 20px rgba(234,104,66,0.35)', marginBottom: 20,
+              boxShadow: '0 8px 20px rgba(215,255,76,0.3)', marginBottom: 20,
               transition: 'opacity 0.2s', opacity: loading ? 0.7 : 1,
             }}
           >
@@ -147,7 +147,7 @@ export default function LoginPage() {
           {isRegister ? 'Ai deja cont? ' : 'Nu ai cont? '}
           <span
             onClick={() => { setIsRegister(v => !v); setError(''); }}
-            style={{ color: '#EA6842', fontWeight: 700, cursor: 'pointer' }}
+            style={{ color: '#4A5A0F', fontWeight: 700, cursor: 'pointer' }}
           >
             {isRegister ? 'Conectează-te' : 'Creează unul gratuit'}
           </span>
