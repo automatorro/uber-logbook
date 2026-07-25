@@ -74,7 +74,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <Link href="/login" style={{ fontSize: 14, fontWeight: 600, color: '#4B4738', textDecoration: 'none' }}>Autentificare</Link>
-            <Link href="/login" style={{ background: INK, color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 100, textDecoration: 'none' }}>Începe gratuit</Link>
+            <Link href="/login?register=1" style={{ background: INK, color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 100, textDecoration: 'none' }}>Începe gratuit</Link>
           </div>
         </div>
       </header>
@@ -95,7 +95,7 @@ export default function LandingPage() {
             Faci o poză bonului de combustibil, PFAuto calculează kilometrii și scoate documentul gata de predat la contabil. Fără Excel, fără hârtii pierdute.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 18 }}>
-            <Link href="/login" style={{ background: LIME, color: INK, fontWeight: 800, fontSize: 15, padding: '16px 30px', borderRadius: 100, textDecoration: 'none', display: 'inline-block', letterSpacing: '-0.01em' }}>
+            <Link href="/login?register=1" style={{ background: LIME, color: INK, fontWeight: 800, fontSize: 15, padding: '16px 30px', borderRadius: 100, textDecoration: 'none', display: 'inline-block', letterSpacing: '-0.01em' }}>
               Începe testul gratuit de 3 zile
             </Link>
             <a href="#calculator" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontWeight: 700, fontSize: 15, padding: '16px 30px', borderRadius: 100, textDecoration: 'none', display: 'inline-block' }}>
@@ -217,7 +217,7 @@ export default function LandingPage() {
                 <span style={{ fontSize: 14, fontWeight: 500, color: INK }}>{f}</span>
               </div>
             ))}
-            <Link href="/login" style={{ display: 'block', marginTop: 28, background: INK, color: '#fff', fontWeight: 800, fontSize: 15, padding: '17px 0', borderRadius: 100, textDecoration: 'none' }}>
+            <Link href="/login?register=1" style={{ display: 'block', marginTop: 28, background: INK, color: '#fff', fontWeight: 800, fontSize: 15, padding: '17px 0', borderRadius: 100, textDecoration: 'none' }}>
               3 zile gratuit — fără card
             </Link>
           </div>
