@@ -56,6 +56,10 @@ export interface Translations {
     removeFuelingBtn: string;
     noFuelingsText: string;
     dailyTotalLabel: string;
+    scanReceiptBtn: string;
+    scanningBtn: string;
+    ocrAutoFilled: string;
+    ocrFailed: string;
     save: string;
     cancel: string;
     kmError: string;
@@ -158,6 +162,10 @@ const translations: Record<Lang, Translations> = {
       removeFuelingBtn: '✕ Șterge',
       noFuelingsText: 'Nicio alimentare înregistrată. Apasă „+ Adaugă alimentare" pentru a înregistra.',
       dailyTotalLabel: 'Total zilnic',
+      scanReceiptBtn: '📷 Scanează bon',
+      scanningBtn: '⏳ Se scanează...',
+      ocrAutoFilled: '✨ Auto-completat — verifică înainte de salvare',
+      ocrFailed: '⚠️ Scanarea nu a reușit — completează manual',
       save: 'Salvează',
       cancel: 'Anulează',
       kmError: 'KM Final nu poate fi mai mic decât KM Start!',
@@ -259,6 +267,10 @@ const translations: Record<Lang, Translations> = {
       removeFuelingBtn: '✕ Remove',
       noFuelingsText: 'No fuelings logged. Press "+ Add fueling" to record one.',
       dailyTotalLabel: 'Daily total',
+      scanReceiptBtn: '📷 Scan receipt',
+      scanningBtn: '⏳ Scanning...',
+      ocrAutoFilled: '✨ Auto-filled — verify before saving',
+      ocrFailed: '⚠️ Scan failed — fill in manually',
       save: 'Save',
       cancel: 'Cancel',
       kmError: 'End KM cannot be less than Start KM!',
