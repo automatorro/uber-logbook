@@ -2,22 +2,19 @@
  * Migrare date Appwrite -> Supabase
  * Rulat o singură dată: npx tsx scripts/migrate-appwrite-to-supabase.ts
  *
- * Variabile necesare în .env.local (sau direct în mediu):
- *   SUPABASE_SERVICE_ROLE_KEY  — din Supabase Dashboard → Project Settings → API → service_role
- *   APPWRITE_USER_ID           — $id-ul contului tău din Appwrite Console → Auth → Users
- *   SUPABASE_USER_ID           — UUID-ul contului tău din Supabase → Authentication → Users
- *
- * Opțional (dacă valorile default din cod nu mai sunt corecte):
- *   NEXT_PUBLIC_SUPABASE_URL   — https://gsgjmatvolhoeavosvgt.supabase.co
+ * Variabile necesare în .env.local:
+ *   SUPABASE_SERVICE_ROLE_KEY  — Supabase Dashboard → Settings → API → service_role
+ *   SUPABASE_USER_ID           — Supabase Dashboard → Authentication → Users → UUID
+ *   APPWRITE_EMAIL             — emailul cu care ești logat în Appwrite
+ *   APPWRITE_PASSWORD          — parola contului Appwrite
  */
 
-import { Client, Databases, Query } from 'appwrite';
+import { Client, Databases, Account, Query } from 'appwrite';
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Încarc .env.local dacă există
 const envPath = path.resolve(process.cwd(), '.env.local');
 if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath });
@@ -29,21 +26,14 @@ if (fs.existsSync(envPath)) {
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gsgjmatvolhoeavosvgt.supabase.co';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const APPWRITE_USER_ID = process.env.APPWRITE_USER_ID;
 const SUPABASE_USER_ID = process.env.SUPABASE_USER_ID;
+const APPWRITE_EMAIL = process.env.APPWRITE_EMAIL;
+const APPWRITE_PASSWORD = process.env.APPWRITE_PASSWORD;
 
-if (!SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('❌ Lipsă: SUPABASE_SERVICE_ROLE_KEY');
-  process.exit(1);
-}
-if (!APPWRITE_USER_ID) {
-  console.error('❌ Lipsă: APPWRITE_USER_ID (caută-l în Appwrite Console → Auth → Users → $id)');
-  process.exit(1);
-}
-if (!SUPABASE_USER_ID) {
-  console.error('❌ Lipsă: SUPABASE_USER_ID (caută-l în Supabase Dashboard → Authentication → Users → UUID)');
-  process.exit(1);
-}
+if (!SUPABASE_SERVICE_ROLE_KEY) { console.error('❌ Lipsă: SUPABASE_SERVICE_ROLE_KEY'); process.exit(1); }
+if (!SUPABASE_USER_ID) { console.error('❌ Lipsă: SUPABASE_USER_ID'); process.exit(1); }
+if (!APPWRITE_EMAIL) { console.error('❌ Lipsă: APPWRITE_EMAIL'); process.exit(1); }
+if (!APPWRITE_PASSWORD) { console.error('❌ Lipsă: APPWRITE_PASSWORD'); process.exit(1); }
 
 // ── Clienți ──────────────────────────────────────────────────────────────────
 
@@ -51,18 +41,16 @@ const appwriteClient = new Client()
   .setEndpoint('https://fra.cloud.appwrite.io/v1')
   .setProject('69de3f290007512434e5');
 
+const appwriteAccount = new Account(appwriteClient);
 const appwriteDb = new Databases(appwriteClient);
 
-// Service role key → ocolește RLS, poate scrie în orice tabel
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY!, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
 const DATABASE_ID = 'uber_db';
 const ENTRIES_COLLECTION_ID = 'entries';
 const SETTINGS_COLLECTION_ID = 'settings';
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -71,8 +59,18 @@ function delay(ms: number) {
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('🚀 Start migrare Appwrite → Supabase');
-  console.log(`   Appwrite user: ${APPWRITE_USER_ID}`);
+  // 0. Autentificare Appwrite
+  console.log('🔐 Mă autentific în Appwrite...');
+  try {
+    await appwriteAccount.createEmailPasswordSession(APPWRITE_EMAIL!, APPWRITE_PASSWORD!);
+    const me = await appwriteAccount.get();
+    console.log(`✅ Autentificat ca: ${me.email} (${me.$id})`);
+  } catch (err: any) {
+    console.error('❌ Autentificare Appwrite eșuată:', err.message);
+    process.exit(1);
+  }
+
+  console.log('');
   console.log(`   Supabase user: ${SUPABASE_USER_ID}`);
   console.log('');
 
@@ -112,7 +110,7 @@ async function main() {
     console.error('❌ Eroare la citirea setărilor:', err.message);
   }
 
-  // 2. Intrări (entries + fuelings)
+  // 2. Intrări
   console.log('\n📅 Citesc intrările din Appwrite...');
 
   let allDocs: any[] = [];
@@ -140,7 +138,6 @@ async function main() {
 
   for (const doc of allDocs) {
     try {
-      // Verifică dacă există deja (după user_id + date)
       const { data: existing } = await supabase
         .from('entries')
         .select('id')
@@ -154,7 +151,6 @@ async function main() {
         continue;
       }
 
-      // Inserează entry
       const { data: newEntry, error: entryErr } = await supabase
         .from('entries')
         .insert({
@@ -176,7 +172,6 @@ async function main() {
         continue;
       }
 
-      // Dacă are alimentare, inserează fueling
       if (doc.fueling_liters > 0) {
         const { error: fuelErr } = await supabase.from('fuelings').insert({
           entry_id: newEntry.id,
@@ -198,7 +193,6 @@ async function main() {
       }
 
       ok++;
-      // Mică pauză ca să nu hammeram API-ul
       await delay(100);
     } catch (err: any) {
       console.error(`   ❌ ${doc.date} — excepție: ${err.message}`);
@@ -213,10 +207,10 @@ async function main() {
   console.log(`❌ Erori             : ${errors}`);
   console.log('═══════════════════════════════════════');
 
-  if (errors > 0) {
-    console.log('\n⚠️  Rulează din nou scriptul — intrările sărite nu se duplică (verifică după date).');
+  if (errors === 0) {
+    console.log('\n🎉 Migrare completă! Verifică în Supabase Dashboard → Table Editor → entries');
   } else {
-    console.log('\n🎉 Migrare completă! Verifică datele în Supabase Dashboard → Table Editor.');
+    console.log('\n⚠️  Rulează din nou — intrările sărite nu se duplică.');
   }
 }
 
