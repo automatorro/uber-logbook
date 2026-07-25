@@ -5,11 +5,11 @@
  * Variabile necesare în .env.local:
  *   SUPABASE_SERVICE_ROLE_KEY  — Supabase Dashboard → Settings → API → service_role
  *   SUPABASE_USER_ID           — Supabase Dashboard → Authentication → Users → UUID
- *   APPWRITE_EMAIL             — emailul cu care ești logat în Appwrite
- *   APPWRITE_PASSWORD          — parola contului Appwrite
+ *   APPWRITE_API_KEY           — Appwrite Console → proiect → Settings → API Keys → Create Key
+ *                                (bifează: databases.read + documents.read)
  */
 
-import { Client, Databases, Account, Query } from 'appwrite';
+import { Client, Databases, Query } from 'node-appwrite';
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
@@ -27,21 +27,19 @@ if (fs.existsSync(envPath)) {
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gsgjmatvolhoeavosvgt.supabase.co';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_USER_ID = process.env.SUPABASE_USER_ID;
-const APPWRITE_EMAIL = process.env.APPWRITE_EMAIL;
-const APPWRITE_PASSWORD = process.env.APPWRITE_PASSWORD;
+const APPWRITE_API_KEY = process.env.APPWRITE_API_KEY;
 
 if (!SUPABASE_SERVICE_ROLE_KEY) { console.error('❌ Lipsă: SUPABASE_SERVICE_ROLE_KEY'); process.exit(1); }
 if (!SUPABASE_USER_ID) { console.error('❌ Lipsă: SUPABASE_USER_ID'); process.exit(1); }
-if (!APPWRITE_EMAIL) { console.error('❌ Lipsă: APPWRITE_EMAIL'); process.exit(1); }
-if (!APPWRITE_PASSWORD) { console.error('❌ Lipsă: APPWRITE_PASSWORD'); process.exit(1); }
+if (!APPWRITE_API_KEY) { console.error('❌ Lipsă: APPWRITE_API_KEY'); process.exit(1); }
 
 // ── Clienți ──────────────────────────────────────────────────────────────────
 
 const appwriteClient = new Client()
   .setEndpoint('https://fra.cloud.appwrite.io/v1')
-  .setProject('69de3f290007512434e5');
+  .setProject('69de3f290007512434e5')
+  .setKey(APPWRITE_API_KEY!);
 
-const appwriteAccount = new Account(appwriteClient);
 const appwriteDb = new Databases(appwriteClient);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -59,29 +57,14 @@ function delay(ms: number) {
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  // 0. Autentificare Appwrite
-  console.log('🔐 Mă autentific în Appwrite...');
-  try {
-    await appwriteAccount.createEmailPasswordSession(APPWRITE_EMAIL!, APPWRITE_PASSWORD!);
-    const me = await appwriteAccount.get();
-    console.log(`✅ Autentificat ca: ${me.email} (${me.$id})`);
-  } catch (err: any) {
-    console.error('❌ Autentificare Appwrite eșuată:', err.message);
-    process.exit(1);
-  }
-
-  console.log('');
+  console.log('🚀 Start migrare Appwrite → Supabase');
   console.log(`   Supabase user: ${SUPABASE_USER_ID}`);
   console.log('');
 
   // 1. Setări
   console.log('📋 Citesc setările din Appwrite...');
   try {
-    const settingsDocs = await appwriteDb.listDocuments(
-      DATABASE_ID,
-      SETTINGS_COLLECTION_ID,
-      [Query.limit(10)]
-    );
+    const settingsDocs = await appwriteDb.listDocuments(DATABASE_ID, SETTINGS_COLLECTION_ID, [Query.limit(10)]);
 
     if (settingsDocs.documents.length > 0) {
       const s = settingsDocs.documents[0];
@@ -98,11 +81,8 @@ async function main() {
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' });
 
-      if (error) {
-        console.error('❌ Eroare la salvarea setărilor:', error.message);
-      } else {
-        console.log('✅ Setări migrate');
-      }
+      if (error) console.error('❌ Eroare setări:', error.message);
+      else console.log('✅ Setări migrate');
     } else {
       console.log('⚠️  Nu există setări în Appwrite (sărit)');
     }
@@ -167,7 +147,7 @@ async function main() {
         .single();
 
       if (entryErr) {
-        console.error(`   ❌ ${doc.date} — eroare entry: ${entryErr.message}`);
+        console.error(`   ❌ ${doc.date} — ${entryErr.message}`);
         errors++;
         continue;
       }
@@ -182,20 +162,16 @@ async function main() {
           station: doc.fueling_station || '',
           bill: doc.fueling_bill || null,
         });
-
-        if (fuelErr) {
-          console.error(`   ⚠️  ${doc.date} — entry OK, eroare fueling: ${fuelErr.message}`);
-        } else {
-          console.log(`   ✅ ${doc.date} — ${doc.kmEnd - doc.kmStart} km, ⛽ ${doc.fueling_liters}L`);
-        }
+        if (fuelErr) console.error(`   ⚠️  ${doc.date} — entry OK, eroare fueling: ${fuelErr.message}`);
+        else console.log(`   ✅ ${doc.date} — ${doc.kmEnd - doc.kmStart} km, ⛽ ${doc.fueling_liters}L`);
       } else {
         console.log(`   ✅ ${doc.date} — ${doc.kmEnd - doc.kmStart} km`);
       }
 
       ok++;
-      await delay(100);
+      await delay(80);
     } catch (err: any) {
-      console.error(`   ❌ ${doc.date} — excepție: ${err.message}`);
+      console.error(`   ❌ ${doc.date} — ${err.message}`);
       errors++;
     }
   }
@@ -208,9 +184,9 @@ async function main() {
   console.log('═══════════════════════════════════════');
 
   if (errors === 0) {
-    console.log('\n🎉 Migrare completă! Verifică în Supabase Dashboard → Table Editor → entries');
+    console.log('\n🎉 Migrare completă! Verifică în Supabase → Table Editor → entries');
   } else {
-    console.log('\n⚠️  Rulează din nou — intrările sărite nu se duplică.');
+    console.log('\n⚠️  Rulează din nou — intrările existente nu se duplică.');
   }
 }
 
