@@ -82,7 +82,7 @@ async function main() {
     const settingsDocs = await appwriteDb.listDocuments(
       DATABASE_ID,
       SETTINGS_COLLECTION_ID,
-      [Query.equal('userId', APPWRITE_USER_ID!)]
+      [Query.limit(10)]
     );
 
     if (settingsDocs.documents.length > 0) {
@@ -123,7 +123,7 @@ async function main() {
     const page = await appwriteDb.listDocuments(
       DATABASE_ID,
       ENTRIES_COLLECTION_ID,
-      [Query.limit(PAGE), Query.offset(offset), Query.equal('userId', APPWRITE_USER_ID!)]
+      [Query.limit(PAGE), Query.offset(offset), Query.orderDesc('date')]
     );
     allDocs = allDocs.concat(page.documents);
     if (page.documents.length < PAGE) break;
