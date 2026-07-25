@@ -4,8 +4,8 @@ export interface Fueling {
   liters: number;
   value: number;
   station: string;
-  odometer: number;
   bill?: string;
+  billPhotoUrl?: string;
 }
 
 export interface TripDetail {
@@ -26,10 +26,10 @@ export interface DailyEntry {
   kmStart: number;
   kmEnd: number;
   tripCount: number;
-  fueling?: Fueling;
+  fuelings: Fueling[];
   startTime: string; // HH:mm
   endTime: string; // HH:mm
-  route: string; // Default: "Zona metropolitana Timisoara"
+  route: string;
 }
 
 export interface Settings {

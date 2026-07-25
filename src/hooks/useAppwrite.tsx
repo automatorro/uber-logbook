@@ -25,15 +25,14 @@ export function useAppwrite() {
     startTime: doc.startTime,
     endTime: doc.endTime,
     route: doc.route,
-    fueling: doc.fueling_liters > 0 ? {
+    fuelings: doc.fueling_liters > 0 ? [{
       id: doc.$id + '_f',
       date: doc.date,
       liters: doc.fueling_liters,
       value: doc.fueling_value,
       station: doc.fueling_station,
       bill: doc.fueling_bill,
-      odometer: doc.kmEnd,
-    } : undefined
+    }] : []
   });
 
   const mapToAppwrite = (entry: DailyEntry, userId: string) => ({
@@ -44,10 +43,10 @@ export function useAppwrite() {
     startTime: entry.startTime,
     endTime: entry.endTime,
     route: entry.route,
-    fueling_liters: entry.fueling?.liters || 0,
-    fueling_value: entry.fueling?.value || 0,
-    fueling_station: entry.fueling?.station || '',
-    fueling_bill: entry.fueling?.bill || '',
+    fueling_liters: entry.fuelings[0]?.liters || 0,
+    fueling_value: entry.fuelings[0]?.value || 0,
+    fueling_station: entry.fuelings[0]?.station || '',
+    fueling_bill: entry.fuelings[0]?.bill || '',
     userId: userId
   });
 

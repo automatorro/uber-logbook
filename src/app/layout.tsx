@@ -2,13 +2,14 @@
 
 import './globals.css';
 import Link from 'next/link';
-import { useAppwrite } from '@/hooks/useAppwrite';
+import { useSupabase } from '@/hooks/useSupabase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { LanguageProvider, useLanguage } from '@/i18n/LanguageContext';
+import InstallPrompt from './components/InstallPrompt';
 
 function NavBar() {
-  const { user, logout, isLoaded } = useAppwrite();
+  const { user, logout, isLoaded } = useSupabase();
   const pathname = usePathname();
   const router = useRouter();
   const isLoginPage = pathname === '/login';
@@ -44,7 +45,6 @@ function NavBar() {
               </button>
             </>
           )}
-          {/* Language toggle — always visible */}
           <button
             onClick={toggleLanguage}
             className="nav-link"
@@ -69,12 +69,17 @@ export default function RootLayout({
       <head>
         <title>Uber Foaie de Parcurs</title>
         <meta name="description" content="Management automat pentru foi de parcurs ANAF" />
+        <meta name="theme-color" content="#6366f1" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body>
         <LanguageProvider>
           <NavBar />
+          <InstallPrompt />
           <main style={{ paddingBottom: '2rem' }}>
             {children}
           </main>

@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppwrite } from '@/hooks/useAppwrite';
+import { useSupabase } from '@/hooks/useSupabase';
 import { Settings } from '@/types';
 import { DEFAULT_SETTINGS } from '@/constants/defaults';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { settings, isLoaded, saveSettings } = useAppwrite();
+  const { settings, isLoaded, saveSettings } = useSupabase();
   const { t } = useLanguage();
   const [localSettings, setLocalSettings] = useState<Settings>(DEFAULT_SETTINGS);
 

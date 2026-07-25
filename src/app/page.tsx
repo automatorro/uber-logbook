@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAppwrite } from '@/hooks/useAppwrite';
+import { useSupabase } from '@/hooks/useSupabase';
 import { DailyEntry } from '@/types';
-import { syncMileageContinuity } from '@/utils/mileage';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 export default function Dashboard() {
-  const { entries, settings, isLoaded, addEntry, deleteEntry, migrateFromLocal, user, recalculateAllMileage, isSyncing } = useAppwrite();
+  const { entries, settings, isLoaded, addEntry, deleteEntry, migrateFromLocal, user, recalculateAllMileage, isSyncing } = useSupabase();
   const { t } = useLanguage();
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
   const [hasLocalData, setHasLocalData] = useState(false);
@@ -20,7 +19,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  // ── Helpers (neatinse) ─────────────────────────────────────────────────────
   const getLatestKmEnd = () => {
     if (entries.length === 0) return 0;
     const sorted = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -40,6 +38,7 @@ export default function Dashboard() {
       kmStart: latestKm,
       kmEnd: latestKm,
       tripCount: 0,
+      fuelings: [],
       startTime: '08:00',
       endTime: '20:00',
       route: settings.defaultZone || 'București'
@@ -62,7 +61,6 @@ export default function Dashboard() {
     }
   };
 
-  // ── Stats derivate ─────────────────────────────────────────────────────────
   const totalKm = entries.reduce((sum, e) => sum + Math.max(0, e.kmEnd - e.kmStart), 0);
   const totalTrips = entries.reduce((sum, e) => sum + e.tripCount, 0);
   const thisMonthEntries = entries.filter(e => {
@@ -72,7 +70,6 @@ export default function Dashboard() {
   });
   const thisMonthKm = thisMonthEntries.reduce((sum, e) => sum + Math.max(0, e.kmEnd - e.kmStart), 0);
 
-  // ── Loading ────────────────────────────────────────────────────────────────
   if (!isLoaded) {
     return (
       <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>
@@ -87,7 +84,6 @@ export default function Dashboard() {
   return (
     <div className="container no-print" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
 
-      {/* ── Banner migrare ────────────────────────────────────────────────── */}
       {hasLocalData && (
         <div className="alert-migration animate-in">
           <div>
@@ -108,7 +104,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Header ───────────────────────────────────────────────────────── */}
       <header className="animate-in" style={{ marginBottom: '1.75rem', animationDelay: '0.05s' }}>
         <div style={{
           background: 'var(--gradient-hero)',
@@ -137,7 +132,6 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* ── Stats ────────────────────────────────────────────────────────── */}
       <div className="stats-grid animate-in" style={{ animationDelay: '0.1s' }}>
         <div className="stat-card">
           <div className="stat-value">{entries.length}</div>
@@ -153,7 +147,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Adaugă zi ────────────────────────────────────────────────────── */}
       <div className="card animate-in" style={{ animationDelay: '0.15s' }}>
         <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', marginBottom: '1rem' }}>
           {t.dashboard.addSectionLabel}
@@ -181,7 +174,6 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* ── Istoric ──────────────────────────────────────────────────────── */}
       <section className="animate-in" style={{ animationDelay: '0.2s' }}>
         <div className="section-header">
           <div>
@@ -236,6 +228,7 @@ export default function Dashboard() {
             const kmDiff = entry.kmEnd - entry.kmStart;
             const entryDate = new Date(entry.date);
             const dayLabel = entryDate.toLocaleDateString('ro-RO', { weekday: 'short', day: 'numeric', month: 'short' });
+            const totalLiters = entry.fuelings.reduce((s, f) => s + f.liters, 0);
 
             return (
               <div
@@ -246,8 +239,8 @@ export default function Dashboard() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <span className="entry-date">{dayLabel}</span>
-                    {entry.fueling && (
-                      <span className="badge badge-amber">⛽ {entry.fueling.liters}L</span>
+                    {entry.fuelings.length > 0 && (
+                      <span className="badge badge-amber">⛽ {totalLiters.toFixed(2)}L</span>
                     )}
                     {entry.tripCount > 0 && (
                       <span className="badge badge-purple">🚦 {entry.tripCount} {t.dashboard.trips}</span>

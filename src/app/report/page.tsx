@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useAppwrite } from '@/hooks/useAppwrite';
+import { useSupabase } from '@/hooks/useSupabase';
 import { useLanguage } from '@/i18n/LanguageContext';
 import './report.css';
 
 export default function ReportPage() {
-  const { entries, settings, isLoaded } = useAppwrite();
+  const { entries, settings, isLoaded } = useSupabase();
   const { t } = useLanguage();
-  
+
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
@@ -19,9 +19,11 @@ export default function ReportPage() {
 
   const totalKm = monthEntries.reduce((acc, curr) => acc + (curr.kmEnd - curr.kmStart), 0);
   const totalTrips = monthEntries.reduce((acc, curr) => acc + curr.tripCount, 0);
-  const totalLiters = monthEntries.reduce((acc, curr) => acc + (curr.fueling?.liters || 0), 0);
-  const totalFuelVal = monthEntries.reduce((acc, curr) => acc + (curr.fueling?.value || 0), 0);
-  
+
+  const allFuelings = monthEntries.flatMap(e => e.fuelings);
+  const totalLiters = allFuelings.reduce((acc, f) => acc + f.liters, 0);
+  const totalFuelVal = allFuelings.reduce((acc, f) => acc + f.value, 0);
+
   const consumptionNormed = (totalKm * settings.fuelNorm) / 100;
   const savings = Math.max(0, consumptionNormed - totalLiters);
 
@@ -126,16 +128,16 @@ export default function ReportPage() {
                 </tr>
               </thead>
               <tbody>
-                {monthEntries.filter(e => e.fueling).map((e, idx) => (
+                {allFuelings.map((f, idx) => (
                   <tr key={idx}>
-                    <td>{new Date(e.date).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit' })}</td>
-                    <td>{e.fueling?.liters}</td>
-                    <td>{e.fueling?.value}</td>
-                    <td>{e.fueling?.station}</td>
-                    <td>{e.fueling?.bill || '-'}</td>
+                    <td>{new Date(f.date).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit' })}</td>
+                    <td>{f.liters}</td>
+                    <td>{f.value}</td>
+                    <td>{f.station}</td>
+                    <td>{f.bill || '-'}</td>
                   </tr>
                 ))}
-                {Array.from({ length: Math.max(0, 15 - monthEntries.filter(e => e.fueling).length) }).map((_, i) => (
+                {Array.from({ length: Math.max(0, 15 - allFuelings.length) }).map((_, i) => (
                   <tr key={i}><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
                 ))}
               </tbody>
@@ -273,7 +275,7 @@ export default function ReportPage() {
                 </tr>
             </tfoot>
         </table>
-        
+
         <div className="verso-footer">
             <div className="sign-box">
                 Certific exactitatea si realitatea<br/>scrierilor din prezenta foaie de parcurs<br/><br/>

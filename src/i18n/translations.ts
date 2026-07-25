@@ -51,6 +51,11 @@ export interface Translations {
     stationPlaceholder: string;
     bill: string;
     billPlaceholder: string;
+    fuelingDate: string;
+    addFuelingBtn: string;
+    removeFuelingBtn: string;
+    noFuelingsText: string;
+    dailyTotalLabel: string;
     save: string;
     cancel: string;
     kmError: string;
@@ -148,6 +153,11 @@ const translations: Record<Lang, Translations> = {
       stationPlaceholder: 'Ex: OMV, Rompetrol...',
       bill: 'Nr. Bon (Opțional)',
       billPlaceholder: 'Ex: 5678',
+      fuelingDate: 'Data alimentării',
+      addFuelingBtn: '+ Adaugă alimentare',
+      removeFuelingBtn: '✕ Șterge',
+      noFuelingsText: 'Nicio alimentare înregistrată. Apasă „+ Adaugă alimentare" pentru a înregistra.',
+      dailyTotalLabel: 'Total zilnic',
       save: 'Salvează',
       cancel: 'Anulează',
       kmError: 'KM Final nu poate fi mai mic decât KM Start!',
@@ -244,6 +254,11 @@ const translations: Record<Lang, Translations> = {
       stationPlaceholder: 'e.g. OMV, Rompetrol...',
       bill: 'Receipt No. (Optional)',
       billPlaceholder: 'e.g. 5678',
+      fuelingDate: 'Fueling date',
+      addFuelingBtn: '+ Add fueling',
+      removeFuelingBtn: '✕ Remove',
+      noFuelingsText: 'No fuelings logged. Press "+ Add fueling" to record one.',
+      dailyTotalLabel: 'Daily total',
       save: 'Save',
       cancel: 'Cancel',
       kmError: 'End KM cannot be less than Start KM!',

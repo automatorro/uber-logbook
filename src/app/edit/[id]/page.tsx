@@ -2,15 +2,26 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useAppwrite } from '@/hooks/useAppwrite';
-import { DailyEntry } from '@/types';
+import { useSupabase } from '@/hooks/useSupabase';
+import { DailyEntry, Fueling } from '@/types';
 import { useLanguage } from '@/i18n/LanguageContext';
+
+function newFueling(entryDate: string): Fueling {
+  return {
+    id: 'new_' + Math.random().toString(36).substring(2, 11),
+    date: entryDate,
+    liters: 0,
+    value: 0,
+    station: '',
+    bill: '',
+  };
+}
 
 export default function EditEntry() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const { entries, isLoaded, updateEntry } = useAppwrite();
+  const { entries, isLoaded, updateEntry } = useSupabase();
   const { t } = useLanguage();
   const [entry, setEntry] = useState<DailyEntry | null>(null);
 
@@ -34,17 +45,29 @@ export default function EditEntry() {
     });
   };
 
-  const handleFuelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const addFueling = () => {
     if (!entry) return;
-    const { name, value } = e.target;
-    const fueling = entry.fueling || { id: Math.random().toString(36).substring(2, 11), date: entry.date, liters: 0, value: 0, station: '', odometer: entry.kmEnd };
+    setEntry({ ...entry, fuelings: [...entry.fuelings, newFueling(entry.date)] });
+  };
+
+  const updateFuelingField = (fuelingId: string, field: keyof Fueling, value: string) => {
+    if (!entry) return;
     setEntry({
       ...entry,
-      fueling: {
-        ...fueling,
-        [name]: name === 'liters' || name === 'value' ? Math.max(0, parseFloat(value) || 0) : value
-      }
+      fuelings: entry.fuelings.map(f => {
+        if (f.id !== fuelingId) return f;
+        const numericFields: (keyof Fueling)[] = ['liters', 'value'];
+        return {
+          ...f,
+          [field]: numericFields.includes(field) ? Math.max(0, parseFloat(value) || 0) : value,
+        };
+      }),
     });
+  };
+
+  const removeFueling = (fuelingId: string) => {
+    if (!entry) return;
+    setEntry({ ...entry, fuelings: entry.fuelings.filter(f => f.id !== fuelingId) });
   };
 
   const handleSave = async () => {
@@ -63,6 +86,9 @@ export default function EditEntry() {
       <p style={{ color: 'var(--muted)', fontWeight: 500 }}>{t.edit.loading}</p>
     </div>
   );
+
+  const totalLiters = entry.fuelings.reduce((s, f) => s + f.liters, 0);
+  const totalValue = entry.fuelings.reduce((s, f) => s + f.value, 0);
 
   return (
     <div className="container" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
@@ -108,27 +134,82 @@ export default function EditEntry() {
       </div>
 
       <div className="card">
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.1rem', fontWeight: 700 }}>{t.edit.sectionFuel}</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div className="form-group">
-            <label>{t.edit.liters}</label>
-            <input className="form-control" type="number" step="0.01" name="liters" value={entry.fueling?.liters || ''} onChange={handleFuelChange} placeholder="0.00" />
-          </div>
-          <div className="form-group">
-            <label>{t.edit.value}</label>
-            <input className="form-control" type="number" step="0.01" name="value" value={entry.fueling?.value || ''} onChange={handleFuelChange} placeholder="0.00" />
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{t.edit.sectionFuel}</h2>
+          <button
+            className="btn btn-primary"
+            onClick={addFueling}
+            style={{ width: 'auto', padding: '0.4rem 0.85rem', fontSize: '0.82rem' }}
+          >
+            {t.edit.addFuelingBtn}
+          </button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div className="form-group">
-            <label>{t.edit.station}</label>
-            <input className="form-control" name="station" value={entry.fueling?.station || ''} onChange={handleFuelChange} placeholder={t.edit.stationPlaceholder} />
-          </div>
-          <div className="form-group">
-            <label>{t.edit.bill}</label>
-            <input className="form-control" name="bill" value={entry.fueling?.bill || ''} onChange={handleFuelChange} placeholder={t.edit.billPlaceholder} />
-          </div>
-        </div>
+
+        {entry.fuelings.length === 0 ? (
+          <p style={{ color: 'var(--muted)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>
+            {t.edit.noFuelingsText}
+          </p>
+        ) : (
+          <>
+            {entry.fuelings.map((fueling, idx) => (
+              <div key={fueling.id} style={{
+                border: '1.5px solid var(--border)',
+                borderRadius: 'var(--radius)',
+                padding: '1rem',
+                marginBottom: '0.75rem',
+                background: 'var(--surface)',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--muted)' }}>
+                    ⛽ #{idx + 1}
+                  </span>
+                  <button
+                    onClick={() => removeFueling(fueling.id)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: '0.85rem', fontWeight: 600 }}
+                  >
+                    {t.edit.removeFuelingBtn}
+                  </button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>{t.edit.liters}</label>
+                    <input className="form-control" type="number" step="0.01" value={fueling.liters || ''} onChange={e => updateFuelingField(fueling.id, 'liters', e.target.value)} placeholder="0.00" />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>{t.edit.value}</label>
+                    <input className="form-control" type="number" step="0.01" value={fueling.value || ''} onChange={e => updateFuelingField(fueling.id, 'value', e.target.value)} placeholder="0.00" />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>{t.edit.station}</label>
+                    <input className="form-control" value={fueling.station} onChange={e => updateFuelingField(fueling.id, 'station', e.target.value)} placeholder={t.edit.stationPlaceholder} />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>{t.edit.bill}</label>
+                    <input className="form-control" value={fueling.bill || ''} onChange={e => updateFuelingField(fueling.id, 'bill', e.target.value)} placeholder={t.edit.billPlaceholder} />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label>{t.edit.fuelingDate}</label>
+                    <input className="form-control" type="date" value={fueling.date} onChange={e => updateFuelingField(fueling.id, 'date', e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{
+              background: 'var(--primary)',
+              color: 'white',
+              borderRadius: 'var(--radius)',
+              padding: '0.65rem 1rem',
+              fontSize: '0.88rem',
+              fontWeight: 700,
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}>
+              <span>{t.edit.dailyTotalLabel}</span>
+              <span>{totalLiters.toFixed(2)} L / {totalValue.toFixed(2)} RON</span>
+            </div>
+          </>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: '1rem' }}>

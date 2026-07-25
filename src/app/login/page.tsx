@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { account } from '@/lib/appwrite';
-import { ID } from 'appwrite';
+import { supabase } from '@/lib/supabase';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 export default function LoginPage() {
@@ -16,17 +15,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     isMounted.current = true;
-    const checkSession = async () => {
-      try {
-        await account.get();
-        if (isMounted.current) {
-          window.location.href = '/';
-        }
-      } catch {
-        // Nu există sesiune, rămânem pe pagina de login
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session && isMounted.current) {
+        window.location.href = '/';
       }
-    };
-    checkSession();
+    });
     return () => { isMounted.current = false; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -36,10 +29,11 @@ export default function LoginPage() {
     setError('');
     try {
       if (isRegistering) {
-        await account.create(ID.unique(), email, password);
-        await account.createEmailPasswordSession(email, password);
+        const { error: signUpErr } = await supabase.auth.signUp({ email, password });
+        if (signUpErr) throw signUpErr;
       } else {
-        await account.createEmailPasswordSession(email, password);
+        const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInErr) throw signInErr;
       }
       window.location.href = '/';
     } catch (err: any) {
@@ -56,7 +50,6 @@ export default function LoginPage() {
   return (
     <div className="container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '80vh' }}>
 
-      {/* Toggle limbă pe pagina de login */}
       <div style={{ position: 'fixed', top: '1rem', right: '1rem' }}>
         <button
           onClick={toggleLanguage}
