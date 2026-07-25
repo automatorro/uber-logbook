@@ -15,6 +15,7 @@ export function useSupabase() {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<'active' | 'inactive'>('inactive');
   const { showToast } = useToast();
 
   const mapFromDB = (row: any): DailyEntry => ({
@@ -56,6 +57,7 @@ export function useSupabase() {
           fuelNorm: Number(settingsData.fuel_norm),
           defaultZone: settingsData.default_zone,
         });
+        setSubscriptionStatus(settingsData.subscription_status === 'active' ? 'active' : 'inactive');
       }
 
       const { data: entriesData, error: entriesError } = await supabase
@@ -234,6 +236,8 @@ export function useSupabase() {
     settings,
     isLoaded,
     isSyncing,
+    subscriptionStatus,
+    isSubscribed: subscriptionStatus === 'active',
     error,
     saveSettings,
     addEntry,

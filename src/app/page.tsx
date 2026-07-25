@@ -7,9 +7,10 @@ import { DailyEntry } from '@/types';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useToast } from '@/app/components/Toast';
 import { SkeletonCard, SkeletonStats } from '@/app/components/Skeleton';
+import { UpgradeGate } from '@/app/components/UpgradeGate';
 
 export default function Dashboard() {
-  const { entries, settings, isLoaded, addEntry, deleteEntry, migrateFromLocal, user, recalculateAllMileage, isSyncing } = useSupabase();
+  const { entries, settings, isLoaded, addEntry, deleteEntry, migrateFromLocal, user, recalculateAllMileage, isSyncing, isSubscribed } = useSupabase();
   const { t } = useLanguage();
   const { showToast, confirm } = useToast();
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
@@ -26,6 +27,7 @@ export default function Dashboard() {
   };
 
   const handleAddDay = async () => {
+    if (!isSubscribed) { showToast('Ai nevoie de abonament activ pentru a adăuga zile noi.', 'warning'); return; }
     const exists = entries.find(e => e.date === newDate);
     if (exists) { showToast(t.dashboard.alreadyExists, 'warning'); return; }
     const latestKm = getLatestKmEnd();
@@ -145,8 +147,13 @@ export default function Dashboard() {
         </svg>
       </button>
 
+      {/* Upgrade gate */}
+      {user && !isSubscribed && (
+        <UpgradeGate userId={user.id} userEmail={user.email || ''} />
+      )}
+
       {/* Add day */}
-      <div id="add-form" className="card animate-in" style={{ animationDelay: '0.1s' }}>
+      <div id="add-form" className="card animate-in" style={{ animationDelay: '0.1s', opacity: isSubscribed ? 1 : 0.45, pointerEvents: isSubscribed ? 'auto' : 'none' }}>
         <p className="section-label">{t.dashboard.addSectionLabel}</p>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <div className="form-group" style={{ flex: 1, minWidth: 150, marginBottom: 0 }}>
