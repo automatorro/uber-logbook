@@ -19,7 +19,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoaded) return;
-    if (!user && !isPublic) router.replace('/login');
+    if (!user && !isPublic) router.replace('/landing');
   }, [isLoaded, user, isPublic, router]);
 
   const showTabs = isLoaded && !!user && !isPublic;

@@ -243,7 +243,7 @@ export function useSupabase() {
     recalculateAllMileage,
     logout: async () => {
       await supabase.auth.signOut();
-      window.location.href = '/login';
+      window.location.href = '/landing';
     },
   };
 }
