@@ -41,7 +41,6 @@ export async function POST(req: NextRequest) {
       cancel_url: `${appUrl}/?subscription=canceled`,
       client_reference_id: userId,
       allow_promotion_codes: true,
-      tax_id_collection: { enabled: true },
     });
 
     return NextResponse.json({ url: session.url });
