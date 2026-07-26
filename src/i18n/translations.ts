@@ -109,7 +109,7 @@ const translations: Record<Lang, Translations> = {
   ro: {
     nav: {
       brand: 'PFAuto',
-      report: 'Raport',
+      report: 'Parcurs',
       settings: 'Setări',
       logout: 'Ieșire',
     },

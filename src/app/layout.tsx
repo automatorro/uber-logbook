@@ -75,7 +75,7 @@ function TabBar({ pathname }: { pathname: string }) {
           <path d="M9 10h6M9 14h6M9 18h3"
             stroke={isReport ? accent : muted} strokeWidth="2" strokeLinecap="round"/>
         </svg>
-        <span>Rapoarte</span>
+        <span>Parcurs</span>
       </Link>
 
       <Link href="/settings" className={`tab-item${isSettings ? ' active' : ''}`}>
