@@ -4,7 +4,9 @@ export interface Fueling {
   liters: number;
   value: number;
   station: string;
+  stationCif?: string;
   bill?: string;
+  paymentMethod?: 'cash' | 'card';
   billPhotoUrl?: string;
 }
 

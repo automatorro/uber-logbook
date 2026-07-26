@@ -33,7 +33,9 @@ export function useSupabase() {
       liters: Number(f.liters),
       value: Number(f.value),
       station: f.station,
+      stationCif: f.station_cif ?? undefined,
       bill: f.bill ?? undefined,
+      paymentMethod: f.payment_method ?? undefined,
       billPhotoUrl: f.bill_photo_url ?? undefined,
     })),
   });
@@ -169,7 +171,9 @@ export function useSupabase() {
         liters: f.liters,
         value: f.value,
         station: f.station,
+        station_cif: f.stationCif ?? null,
         bill: f.bill ?? null,
+        payment_method: f.paymentMethod ?? null,
         bill_photo_url: f.billPhotoUrl ?? null,
       })).map(r => { if (!r.id) { const { id: _, ...rest } = r; return rest; } return r; });
 

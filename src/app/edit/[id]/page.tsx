@@ -9,7 +9,7 @@ import { useToast } from '@/app/components/Toast';
 import { supabase } from '@/lib/supabase';
 
 function newFueling(entryDate: string): Fueling {
-  return { id: 'new_' + Math.random().toString(36).substring(2, 11), date: entryDate, liters: 0, value: 0, station: '', bill: '' };
+  return { id: 'new_' + Math.random().toString(36).substring(2, 11), date: entryDate, liters: 0, value: 0, station: '', stationCif: '', bill: '', paymentMethod: 'card' };
 }
 
 async function compressImage(file: File, maxWidth = 1200): Promise<{ base64: string; mediaType: string }> {
@@ -69,7 +69,9 @@ export default function EditEntry() {
       fuelings: entry.fuelings.map(f => {
         if (f.id !== fuelingId) return f;
         const numericFields: (keyof Fueling)[] = ['liters', 'value'];
-        return { ...f, [field]: numericFields.includes(field) ? Math.max(0, parseFloat(value) || 0) : value };
+        if (numericFields.includes(field)) return { ...f, [field]: Math.max(0, parseFloat(value) || 0) };
+        if (field === 'paymentMethod') return { ...f, paymentMethod: value as 'cash' | 'card' };
+        return { ...f, [field]: value };
       }),
     });
   };
@@ -101,7 +103,7 @@ export default function EditEntry() {
         if (billPhotoUrl) f.billPhotoUrl = billPhotoUrl;
         setEntry({ ...entry, fuelings: [...entry.fuelings, f] });
       } else {
-        const f: Fueling = { id: 'new_' + Math.random().toString(36).substring(2, 11), date: data.date || entry.date, liters: data.liters ?? 0, value: data.value ?? 0, station: data.station ?? '', bill: data.bill ?? '', billPhotoUrl };
+        const f: Fueling = { id: 'new_' + Math.random().toString(36).substring(2, 11), date: data.date || entry.date, liters: data.liters ?? 0, value: data.value ?? 0, station: data.station ?? '', stationCif: data.stationCif ?? '', bill: data.bill ?? '', paymentMethod: data.paymentMethod ?? 'card', billPhotoUrl };
         setEntry({ ...entry, fuelings: [...entry.fuelings, f] });
         setOcrFilledIds(prev => new Set(prev).add(f.id));
         showToast(t.edit.ocrAutoFilled, 'success');
@@ -231,7 +233,21 @@ export default function EditEntry() {
                         { label: t.edit.liters,       node: <input type="number" step="0.01" value={fueling.liters || ''} onChange={e => updateFuelingField(fueling.id, 'liters', e.target.value)} placeholder="0.00" style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 80 }} /> },
                         { label: t.edit.value,        node: <input type="number" step="0.01" value={fueling.value || ''} onChange={e => updateFuelingField(fueling.id, 'value', e.target.value)} placeholder="0.00" style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 90 }} /> },
                         { label: t.edit.station,      node: <input value={fueling.station} onChange={e => updateFuelingField(fueling.id, 'station', e.target.value)} placeholder="OMV, Petrom..." style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 130 }} /> },
+                        { label: 'CIF benzinărie',    node: <input value={fueling.stationCif || ''} onChange={e => updateFuelingField(fueling.id, 'stationCif', e.target.value)} placeholder="RO12345678" style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 120 }} /> },
                         { label: t.edit.bill,         node: <input value={fueling.bill || ''} onChange={e => updateFuelingField(fueling.id, 'bill', e.target.value)} placeholder="nr. bon" style={{ ...smallInput, border: 'none', background: 'transparent', textAlign: 'right', width: 100 }} /> },
+                        { label: 'Plată', node: (
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            {(['card', 'cash'] as const).map(m => (
+                              <button key={m} onClick={() => updateFuelingField(fueling.id, 'paymentMethod', m)}
+                                style={{ padding: '4px 12px', borderRadius: 100, border: '1.5px solid', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', transition: 'all 0.12s',
+                                  borderColor: fueling.paymentMethod === m ? '#171511' : '#E7E2D3',
+                                  background: fueling.paymentMethod === m ? '#171511' : 'transparent',
+                                  color: fueling.paymentMethod === m ? '#D7FF4C' : '#8C8776' }}>
+                                {m === 'card' ? '💳 Card' : '💵 Cash'}
+                              </button>
+                            ))}
+                          </div>
+                        )},
                       ].map((row, i, arr) => (
                         <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderBottom: i < arr.length - 1 ? '1px solid #EFEBDD' : 'none', background: '#fff' }}>
                           <span style={{ fontSize: 13.5, color: '#8C8776', fontWeight: 600 }}>{row.label}</span>

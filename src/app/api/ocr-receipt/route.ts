@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 
-const FAILED = { ocrFailed: true, liters: null, value: null, station: null, date: null, bill: null };
+const FAILED = { ocrFailed: true, liters: null, value: null, station: null, stationCif: null, date: null, bill: null, paymentMethod: null };
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -42,8 +42,10 @@ Returnează DOAR un obiect JSON valid, fără alt text, cu exact aceste câmpuri
   "liters": număr zecimal sau null,
   "value": număr zecimal sau null (suma totală plătită în RON),
   "station": string sau null (numele stației: OMV, Rompetrol, MOL, Petrom etc.),
+  "stationCif": string sau null (CIF-ul sau codul fiscal al stației, de obicei precedat de RO pe bon),
   "date": string sau null (format YYYY-MM-DD),
-  "bill": string sau null (numărul bonului sau chitanței fiscale)
+  "bill": string sau null (numărul bonului fiscal sau chitanței),
+  "paymentMethod": "cash" sau "card" sau null (modalitatea de plată vizibilă pe bon)
 }
 Dacă un câmp nu este vizibil sau lizibil, pune null.`,
           },
@@ -61,8 +63,10 @@ Dacă un câmp nu este vizibil sau lizibil, pune null.`,
       liters: typeof data.liters === 'number' ? data.liters : null,
       value: typeof data.value === 'number' ? data.value : null,
       station: typeof data.station === 'string' ? data.station : null,
+      stationCif: typeof data.stationCif === 'string' ? data.stationCif : null,
       date: typeof data.date === 'string' ? data.date : null,
       bill: typeof data.bill === 'string' ? data.bill : null,
+      paymentMethod: data.paymentMethod === 'cash' || data.paymentMethod === 'card' ? data.paymentMethod : null,
     });
   } catch (err) {
     console.error('OCR error:', err);
