@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSupabase } from '@/hooks/useSupabase';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { exportToExcel, exportToXML, exportToPDF } from '@/utils/fuelExport';
 import './report.css';
 
 export default function ReportPage() {
@@ -11,6 +12,8 @@ export default function ReportPage() {
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [exportScope, setExportScope] = useState<'month' | 'year'>('month');
+  const [exporting, setExporting] = useState(false);
 
   const monthEntries = entries.filter(e => {
     const d = new Date(e.date);
@@ -23,6 +26,29 @@ export default function ReportPage() {
   const allFuelings = monthEntries.flatMap(e => e.fuelings);
   const totalLiters = allFuelings.reduce((acc, f) => acc + f.liters, 0);
   const totalFuelVal = allFuelings.reduce((acc, f) => acc + f.value, 0);
+
+  const yearEntries = entries.filter(e => new Date(e.date).getFullYear() === currentYear);
+  const yearFuelings = yearEntries.flatMap(e => e.fuelings);
+
+  const exportFuelings = exportScope === 'month' ? allFuelings : yearFuelings;
+  const exportPeriod = exportScope === 'month'
+    ? new Intl.DateTimeFormat('ro-RO', { month: 'long', year: 'numeric' }).format(new Date(currentYear, currentMonth))
+    : `Anul ${currentYear}`;
+  const exportFilename = exportScope === 'month'
+    ? `bonuri-combustibil-${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`
+    : `bonuri-combustibil-${currentYear}`;
+
+  const handleExport = async (format: 'excel' | 'xml' | 'pdf') => {
+    if (exportFuelings.length === 0) return;
+    setExporting(true);
+    try {
+      if (format === 'excel') await exportToExcel(exportFuelings, exportFilename);
+      else if (format === 'xml') exportToXML(exportFuelings, settings, exportFilename);
+      else exportToPDF(exportFuelings, settings, exportPeriod);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const consumptionNormed = (totalKm * settings.fuelNorm) / 100;
   const savings = Math.max(0, consumptionNormed - totalLiters);
@@ -64,6 +90,60 @@ export default function ReportPage() {
             ← Foaia A4 se poate derula orizontal mai jos →
           </p>
         </div>
+      </div>
+
+      {/* Export bonuri combustibil */}
+      <div className="card" style={{ margin: '0 1rem 1rem', borderRadius: 20 }}>
+        <p className="section-label" style={{ marginBottom: '0.75rem' }}>Export bonuri combustibil</p>
+
+        {/* Scope toggle */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: '0.875rem' }}>
+          {(['month', 'year'] as const).map(s => (
+            <button key={s} onClick={() => setExportScope(s)} style={{
+              flex: 1, padding: '8px 0', borderRadius: 100, border: '1.5px solid',
+              fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.12s',
+              borderColor: exportScope === s ? '#171511' : 'var(--border)',
+              background: exportScope === s ? '#171511' : 'transparent',
+              color: exportScope === s ? '#D7FF4C' : 'var(--muted)',
+            }}>
+              {s === 'month' ? `Luna selectată` : `Tot ${currentYear}`}
+            </button>
+          ))}
+        </div>
+
+        {/* Summary */}
+        <div style={{ background: 'var(--bg)', borderRadius: 12, padding: '8px 14px', marginBottom: '0.875rem', fontSize: 13, color: 'var(--muted)', display: 'flex', justifyContent: 'space-between' }}>
+          <span>{exportPeriod}</span>
+          <span style={{ fontWeight: 700, color: 'var(--text)' }}>
+            {exportFuelings.length} {exportFuelings.length === 1 ? 'bon' : 'bonuri'}
+            {exportFuelings.length > 0 && ` · ${exportFuelings.reduce((s, f) => s + f.value, 0).toFixed(2)} RON`}
+          </span>
+        </div>
+
+        {exportFuelings.length === 0 ? (
+          <p style={{ fontSize: 13, color: 'var(--muted)', textAlign: 'center', padding: '8px 0' }}>
+            Nu există bonuri înregistrate pentru perioada selectată.
+          </p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+            {([
+              { fmt: 'excel' as const, label: '📊 Excel', sub: '.xlsx' },
+              { fmt: 'pdf'   as const, label: '🖨️ PDF',   sub: 'printabil' },
+              { fmt: 'xml'   as const, label: '🗂️ XML',   sub: 'contabilitate' },
+            ]).map(({ fmt, label, sub }) => (
+              <button key={fmt} onClick={() => handleExport(fmt)} disabled={exporting} style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                padding: '10px 6px', borderRadius: 14,
+                border: '1.5px solid var(--border)', background: 'var(--card-bg)',
+                cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.6 : 1,
+                transition: 'opacity 0.12s',
+              }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{label}</span>
+                <span style={{ fontSize: 10.5, color: 'var(--muted)' }}>{sub}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="document-scroll-area">
