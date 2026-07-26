@@ -259,11 +259,11 @@ export default function EditEntry() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
             <div style={{ background: '#F8F5EE', borderRadius: 16, padding: '12px 14px', border: '1px solid #E7E2D3' }}>
               <div style={{ fontSize: 12, color: '#8C8776', fontWeight: 600, marginBottom: 6 }}>Plecare</div>
-              <input type="number" name="kmStart" value={entry.kmStart} onChange={handleChange} style={{ ...inputStyle, height: 36, borderRadius: 8, padding: '0 10px', fontSize: 16, fontWeight: 700, border: '1.5px solid #E7E2D3' }} />
+              <input type="number" name="kmStart" value={entry.kmStart || ''} onChange={handleChange} style={{ ...inputStyle, height: 36, borderRadius: 8, padding: '0 10px', fontSize: 16, fontWeight: 700, border: '1.5px solid #E7E2D3' }} />
             </div>
             <div style={{ background: '#F8F5EE', borderRadius: 16, padding: '12px 14px', border: '1px solid #E7E2D3' }}>
               <div style={{ fontSize: 12, color: '#8C8776', fontWeight: 600, marginBottom: 6 }}>Sosire</div>
-              <input type="number" name="kmEnd" value={entry.kmEnd} onChange={handleChange} style={{ ...inputStyle, height: 36, borderRadius: 8, padding: '0 10px', fontSize: 16, fontWeight: 700, border: '1.5px solid #E7E2D3' }} />
+              <input type="number" name="kmEnd" value={entry.kmEnd || ''} onChange={handleChange} style={{ ...inputStyle, height: 36, borderRadius: 8, padding: '0 10px', fontSize: 16, fontWeight: 700, border: '1.5px solid #E7E2D3' }} />
             </div>
           </div>
 
@@ -285,7 +285,7 @@ export default function EditEntry() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>{t.edit.tripCount}</label>
-              <input className="form-control" type="number" name="tripCount" value={entry.tripCount} onChange={handleChange} />
+              <input className="form-control" type="number" name="tripCount" value={entry.tripCount || ''} onChange={handleChange} />
             </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>{t.edit.route}</label>

@@ -24,7 +24,7 @@ export default function SettingsPage() {
     const { name, value } = e.target;
     setLocalSettings(prev => ({
       ...prev,
-      [name]: name === 'fuelNorm' ? parseFloat(value) || 0 : value,
+      [name]: name === 'fuelNorm' ? (value === '' ? 0 : parseFloat(value) || 0) : value,
     }));
   };
 
@@ -103,7 +103,7 @@ export default function SettingsPage() {
       {/* Configurări ANAF */}
       <p className="settings-section-label animate-in" style={{ animationDelay: '0.12s' }}>Configurări ANAF</p>
       <div className="settings-card animate-in" style={{ animationDelay: '0.14s' }}>
-        <RowInput label={t.settings.fuelNorm} name="fuelNorm" value={localSettings.fuelNorm} type="number" step="0.1" />
+        <RowInput label={t.settings.fuelNorm} name="fuelNorm" value={localSettings.fuelNorm || ''} type="number" step="0.1" />
         <RowInput label={t.settings.defaultZone} name="defaultZone" value={localSettings.defaultZone} />
       </div>
 
