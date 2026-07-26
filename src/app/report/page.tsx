@@ -33,32 +33,40 @@ export default function ReportPage() {
 
   return (
     <div className="report-container">
-      <div className="no-print controls card">
-        <h3>{t.report.filterTitle}</h3>
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-          <select
-            className="form-control"
-            value={currentMonth}
-            onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
-          >
-            {Array.from({ length: 12 }).map((_, i) => (
-              <option key={i} value={i}>
-                {new Intl.DateTimeFormat('ro-RO', { month: 'long' }).format(new Date(0, i))}
-              </option>
-            ))}
-          </select>
-          <input
-            className="form-control"
-            type="number"
-            value={currentYear}
-            onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-          />
+      <div className="report-controls no-print">
+        <div className="card" style={{ marginBottom: 0 }}>
+          <h3>{t.report.filterTitle}</h3>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+            <select
+              className="form-control"
+              value={currentMonth}
+              onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
+            >
+              {Array.from({ length: 12 }).map((_, i) => (
+                <option key={i} value={i}>
+                  {new Intl.DateTimeFormat('ro-RO', { month: 'long' }).format(new Date(0, i))}
+                </option>
+              ))}
+            </select>
+            <input
+              className="form-control"
+              type="number"
+              value={currentYear}
+              onChange={(e) => setCurrentYear(parseInt(e.target.value))}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginTop: '1rem' }}>
+            <button className="btn btn-primary" onClick={() => window.print()} style={{ flex: 1 }}>
+              {t.report.printBtn}
+            </button>
+          </div>
+          <p style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.5rem', textAlign: 'center' }}>
+            ← Foaia A4 se poate derula orizontal mai jos →
+          </p>
         </div>
-        <button className="btn btn-primary" onClick={() => window.print()} style={{ marginTop: '1rem' }}>
-          {t.report.printBtn}
-        </button>
       </div>
 
+      <div className="document-scroll-area">
       <div className="document-page fata">
         <div className="header-grid">
           <div className="unitatea-box">
@@ -289,6 +297,7 @@ export default function ReportPage() {
                 Observatii speciale:<br/><hr/><hr/><hr/>
             </div>
         </div>
+      </div>
       </div>
     </div>
   );
