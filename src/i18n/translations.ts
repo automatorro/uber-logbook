@@ -205,8 +205,8 @@ const translations: Record<Lang, Translations> = {
       error: 'Eroare de autentificare. Verifică datele.',
     },
     report: {
-      filterTitle: 'Filtrare Raport',
-      printBtn: '🖨️ Imprimă Raportul (A4)',
+      filterTitle: 'Foaie de parcurs',
+      printBtn: '🖨️ Tipărește foaia de parcurs',
       loading: 'Se încarcă...',
     },
   },
