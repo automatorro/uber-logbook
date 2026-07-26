@@ -15,6 +15,7 @@ export default function Dashboard() {
   const { showToast, confirm } = useToast();
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
   const [hasLocalData, setHasLocalData] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
 
   useEffect(() => {
     const local = localStorage.getItem('uber-entries');
@@ -87,6 +88,18 @@ export default function Dashboard() {
 
   const sortedEntries = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const driverFirstName = settings.driverName?.split(' ')[0] || user?.email?.split('@')[0] || 'șofer';
+
+  const months = Array.from(new Set(entries.map(e => e.date.slice(0, 7))))
+    .sort((a, b) => b.localeCompare(a));
+
+  const monthEntries = sortedEntries.filter(e => e.date.startsWith(selectedMonth));
+
+  const formatMonthLabel = (key: string) => {
+    const [year, month] = key.split('-');
+    const d = new Date(Number(year), Number(month) - 1, 1);
+    const mo = d.toLocaleDateString('ro-RO', { month: 'short' }).replace('.', '');
+    return { mo: mo.charAt(0).toUpperCase() + mo.slice(1), year };
+  };
 
   return (
     <div className="container no-print" style={{ paddingTop: '1.5rem' }}>
@@ -189,36 +202,76 @@ export default function Dashboard() {
             <p className="empty-state-title">{t.dashboard.emptyTitle}</p>
             <p className="empty-state-text">{t.dashboard.emptyText}</p>
           </div>
-        ) : sortedEntries.map((entry, i) => {
-          const kmDiff = entry.kmEnd - entry.kmStart;
-          const dayLabel = new Date(entry.date).toLocaleDateString('ro-RO', { weekday: 'short', day: 'numeric', month: 'short' });
-          const totalLiters = entry.fuelings.reduce((s, f) => s + f.liters, 0);
-          return (
-            <div key={entry.id} className="entry-card animate-in" style={{ animationDelay: `${0.15 + i * 0.025}s` }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-                  <span className="entry-date">{dayLabel}</span>
-                  {entry.fuelings.length > 0 && <span className="badge badge-amber">⛽ {totalLiters.toFixed(1)}L</span>}
-                  {entry.tripCount > 0 && <span className="badge badge-purple">🚦 {entry.tripCount}</span>}
-                </div>
-                <div className="entry-km" style={{ marginTop: '0.15rem' }}>
-                  <strong>{entry.kmStart.toLocaleString('ro-RO')}</strong>
-                  <span style={{ opacity: 0.4, margin: '0 0.3rem' }}>→</span>
-                  <strong>{entry.kmEnd.toLocaleString('ro-RO')}</strong>
-                  <span style={{ opacity: 0.4 }}> km</span>
-                  {kmDiff > 0 && <span className="badge badge-green" style={{ marginLeft: '0.3rem' }}>+{kmDiff}</span>}
-                </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.1rem' }}>
-                  {entry.startTime} – {entry.endTime} · {entry.route}
-                </div>
-              </div>
-              <div className="entry-actions">
-                <Link href={`/edit/${entry.id}`} className="btn-icon btn-icon-edit" title="Editează">✏️</Link>
-                <button onClick={() => removeEntry(entry.id)} className="btn-icon btn-icon-delete" title="Șterge">🗑️</button>
-              </div>
+        ) : (
+          <>
+            {/* Month picker band */}
+            <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '0.75rem', scrollbarWidth: 'none' }}>
+              {months.map(key => {
+                const { mo, year } = formatMonthLabel(key);
+                const isSelected = key === selectedMonth;
+                const count = entries.filter(e => e.date.startsWith(key)).length;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedMonth(key)}
+                    style={{
+                      flexShrink: 0,
+                      display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      gap: '2px',
+                      padding: '10px 14px',
+                      borderRadius: 16,
+                      border: isSelected ? '2px solid #D7FF4C' : '2px solid var(--border)',
+                      background: isSelected ? '#171511' : 'var(--card-bg)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: isSelected ? '#D7FF4C' : 'var(--text)', lineHeight: 1 }}>{mo}</span>
+                    <span style={{ fontSize: '0.68rem', color: isSelected ? 'rgba(215,255,76,0.65)' : 'var(--muted)', lineHeight: 1 }}>{year}</span>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 600, color: isSelected ? 'rgba(215,255,76,0.5)' : 'var(--muted)', marginTop: 2 }}>{count}z</span>
+                  </button>
+                );
+              })}
             </div>
-          );
-        })}
+
+            {/* Day cards for selected month */}
+            {monthEntries.length === 0 ? (
+              <div className="card empty-state">
+                <div className="empty-state-icon">📭</div>
+                <p className="empty-state-title">Nicio zi în această lună</p>
+              </div>
+            ) : monthEntries.map((entry, i) => {
+              const kmDiff = entry.kmEnd - entry.kmStart;
+              const dayLabel = new Date(entry.date).toLocaleDateString('ro-RO', { weekday: 'short', day: 'numeric', month: 'short' });
+              const totalLiters = entry.fuelings.reduce((s, f) => s + f.liters, 0);
+              return (
+                <div key={entry.id} className="entry-card animate-in" style={{ animationDelay: `${0.05 + i * 0.025}s` }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                      <span className="entry-date">{dayLabel}</span>
+                      {entry.fuelings.length > 0 && <span className="badge badge-amber">⛽ {totalLiters.toFixed(1)}L</span>}
+                      {entry.tripCount > 0 && <span className="badge badge-purple">🚦 {entry.tripCount}</span>}
+                    </div>
+                    <div className="entry-km" style={{ marginTop: '0.15rem' }}>
+                      <strong>{entry.kmStart.toLocaleString('ro-RO')}</strong>
+                      <span style={{ opacity: 0.4, margin: '0 0.3rem' }}>→</span>
+                      <strong>{entry.kmEnd.toLocaleString('ro-RO')}</strong>
+                      <span style={{ opacity: 0.4 }}> km</span>
+                      {kmDiff > 0 && <span className="badge badge-green" style={{ marginLeft: '0.3rem' }}>+{kmDiff}</span>}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.1rem' }}>
+                      {entry.startTime} – {entry.endTime} · {entry.route}
+                    </div>
+                  </div>
+                  <div className="entry-actions">
+                    <Link href={`/edit/${entry.id}`} className="btn-icon btn-icon-edit" title="Editează">✏️</Link>
+                    <button onClick={() => removeEntry(entry.id)} className="btn-icon btn-icon-delete" title="Șterge">🗑️</button>
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        )}
       </section>
     </div>
   );
